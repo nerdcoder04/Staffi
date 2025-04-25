@@ -1,0 +1,449 @@
+{
+  "info": {
+    "name": "STAFFI Backend API",
+    "description": "API documentation for STAFFI backend services",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "HR Authentication",
+      "description": "HR wallet-based authentication endpoints",
+      "item": [
+        {
+          "name": "HR Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"walletAddress\": \"0x1234567890123456789012345678901234567890\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/auth/hr-login",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "auth", "hr-login"]
+            },
+            "description": "Authenticate HR user using wallet address"
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"walletAddress\": \"0x1234567890123456789012345678901234567890\"\n}"
+                },
+                "url": {
+                  "raw": "http://localhost:3000/api/auth/hr-login"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n    \"message\": \"HR login successful\",\n    \"user\": {\n        \"id\": \"123e4567-e89b-12d3-a456-426614174000\",\n        \"name\": \"John Doe\",\n        \"email\": \"john@example.com\",\n        \"wallet\": \"0x1234567890123456789012345678901234567890\"\n    }\n}"
+            },
+            {
+              "name": "Error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}"
+                },
+                "url": {
+                  "raw": "http://localhost:3000/api/auth/hr-login"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n    \"error\": \"Wallet address is required\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get HR Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-wallet-address",
+                "value": "0x1234567890123456789012345678901234567890"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/hr/details",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "hr", "details"]
+            },
+            "description": "Get HR user details"
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:3000/api/hr/details"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n    \"success\": true,\n    \"data\": {\n        \"id\": \"123e4567-e89b-12d3-a456-426614174000\",\n        \"name\": \"John Doe\",\n        \"email\": \"john@example.com\",\n        \"wallet\": \"0x1234567890123456789012345678901234567890\"\n    }\n}"
+            },
+            {
+              "name": "Error",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:3000/api/hr/details"
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n    \"error\": \"Unauthorized HR access\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Employee Authentication",
+      "description": "Employee email/password authentication endpoints",
+      "item": [
+        {
+          "name": "Employee Signup",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"employee@example.com\",\n    \"password\": \"password123\",\n    \"name\": \"Employee Name\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/auth/employee/signup",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "auth", "employee", "signup"]
+            },
+            "description": "Register a new employee"
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"email\": \"employee@example.com\",\n    \"password\": \"password123\",\n    \"name\": \"Employee Name\"\n}"
+                },
+                "url": {
+                  "raw": "http://localhost:3000/api/auth/employee/signup"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n    \"message\": \"Employee signup successful\",\n    \"user\": {\n        \"id\": \"123e4567-e89b-12d3-a456-426614174000\",\n        \"email\": \"employee@example.com\"\n    }\n}"
+            },
+            {
+              "name": "Error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"email\": \"employee@example.com\"\n}"
+                },
+                "url": {
+                  "raw": "http://localhost:3000/api/auth/employee/signup"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n    \"error\": \"Email, password, and name are required\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Employee Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"employee@example.com\",\n    \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/auth/employee/login",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "auth", "employee", "login"]
+            },
+            "description": "Login employee with email and password"
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"email\": \"employee@example.com\",\n    \"password\": \"password123\"\n}"
+                },
+                "url": {
+                  "raw": "http://localhost:3000/api/auth/employee/login"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n    \"message\": \"Employee login successful\",\n    \"user\": {\n        \"id\": \"123e4567-e89b-12d3-a456-426614174000\",\n        \"email\": \"employee@example.com\"\n    },\n    \"session\": {\n        \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"\n    }\n}"
+            },
+            {
+              "name": "Error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"email\": \"wrong@example.com\",\n    \"password\": \"wrongpassword\"\n}"
+                },
+                "url": {
+                  "raw": "http://localhost:3000/api/auth/employee/login"
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n    \"error\": \"Invalid credentials\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Employee Management",
+      "description": "Employee management endpoints (HR only)",
+      "item": [
+        {
+          "name": "Add Employee",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-wallet-address",
+                "value": "0x1234567890123456789012345678901234567890"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"New Employee\",\n    \"email\": \"new.employee@example.com\",\n    \"role\": \"Software Engineer\",\n    \"department\": \"Engineering\",\n    \"wallet\": \"0x9876543210987654321098765432109876543210\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/employee/add",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "employee", "add"]
+            },
+            "description": "Add a new employee (HR only)"
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"New Employee\",\n    \"email\": \"new.employee@example.com\",\n    \"role\": \"Software Engineer\",\n    \"department\": \"Engineering\"\n}"
+                },
+                "url": {
+                  "raw": "http://localhost:3000/api/employee/add"
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n    \"message\": \"Employee added successfully\",\n    \"employee\": {\n        \"id\": \"123e4567-e89b-12d3-a456-426614174000\",\n        \"name\": \"New Employee\",\n        \"email\": \"new.employee@example.com\",\n        \"role\": \"Software Engineer\",\n        \"department\": \"Engineering\",\n        \"status\": true,\n        \"doj\": \"2024-04-25T12:00:00Z\"\n    }\n}"
+            },
+            {
+              "name": "Error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"New Employee\"\n}"
+                },
+                "url": {
+                  "raw": "http://localhost:3000/api/employee/add"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n    \"error\": \"Name, email, role, and department are required\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Protected Routes",
+      "description": "Protected route examples for testing authentication",
+      "item": [
+        {
+          "name": "HR Protected Route",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-wallet-address",
+                "value": "0x1234567890123456789012345678901234567890"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/protected/hr-route",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "protected", "hr-route"]
+            },
+            "description": "Test HR authentication"
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:3000/api/protected/hr-route"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n    \"message\": \"HR access granted\"\n}"
+            },
+            {
+              "name": "Error",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:3000/api/protected/hr-route"
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n    \"error\": \"Unauthorized HR access\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Employee Protected Route",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/api/protected/employee-route",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "protected", "employee-route"]
+            },
+            "description": "Test employee authentication"
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:3000/api/protected/employee-route"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n    \"message\": \"Employee access granted\"\n}"
+            },
+            {
+              "name": "Error",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:3000/api/protected/employee-route"
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n    \"error\": \"Invalid or expired token\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+} 
