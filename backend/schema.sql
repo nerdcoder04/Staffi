@@ -1,15 +1,60 @@
 -- Enable UUID extension if not already enabled
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Employees table
+-- Define roles table for predefined roles
+CREATE TABLE IF NOT EXISTS roles (
+    id SERIAL PRIMARY KEY,
+    role_name TEXT UNIQUE NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Insert predefined roles
+INSERT INTO roles (role_name, description) 
+VALUES 
+('ADMIN', 'Administrator with full access'),
+('MANAGER', 'Team or department manager'),
+('DEVELOPER', 'Software developer or engineer'),
+('DESIGNER', 'UI/UX or graphic designer'),
+('HR', 'Human resources personnel'),
+('FINANCE', 'Finance and accounting staff'),
+('MARKETING', 'Marketing and communications'),
+('SALES', 'Sales representative'),
+('SUPPORT', 'Customer support staff'),
+('INTERN', 'Temporary intern position')
+ON CONFLICT (role_name) DO NOTHING;
+
+-- Departments table for predefined departments
+CREATE TABLE IF NOT EXISTS departments (
+    id SERIAL PRIMARY KEY,
+    dept_name TEXT UNIQUE NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Insert predefined departments
+INSERT INTO departments (dept_name, description) 
+VALUES 
+('ENGINEERING', 'Software development and engineering'),
+('DESIGN', 'Product and graphic design'),
+('OPERATIONS', 'Business operations'),
+('FINANCE', 'Finance and accounting'),
+('MARKETING', 'Marketing and communications'),
+('SALES', 'Sales and customer acquisition'),
+('HUMAN_RESOURCES', 'HR and talent management'),
+('CUSTOMER_SUPPORT', 'Customer service and support')
+ON CONFLICT (dept_name) DO NOTHING;
+
+-- Employees table (updated with role and department references)
 CREATE TABLE IF NOT EXISTS employees (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
     wallet TEXT UNIQUE,
-    role TEXT NOT NULL,
+    role_id INTEGER NOT NULL REFERENCES roles(id),
+    department_id INTEGER NOT NULL REFERENCES departments(id),
     doj DATE NOT NULL,
-    department TEXT NOT NULL,
     status BOOLEAN DEFAULT true,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -67,6 +112,8 @@ CREATE TABLE IF NOT EXISTS ai_logs (
 -- Create indexes for better query performance
 CREATE INDEX IF NOT EXISTS idx_employees_email ON employees(email);
 CREATE INDEX IF NOT EXISTS idx_employees_wallet ON employees(wallet);
+CREATE INDEX IF NOT EXISTS idx_employees_role_id ON employees(role_id);
+CREATE INDEX IF NOT EXISTS idx_employees_department_id ON employees(department_id);
 CREATE INDEX IF NOT EXISTS idx_hr_users_wallet ON hr_users(wallet);
 CREATE INDEX IF NOT EXISTS idx_leaves_emp_id ON leaves(emp_id);
 CREATE INDEX IF NOT EXISTS idx_payrolls_emp_id ON payrolls(emp_id);

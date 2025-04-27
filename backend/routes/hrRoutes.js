@@ -3,6 +3,71 @@ const router = express.Router();
 const supabase = require('../utils/supabaseClient');
 const { authenticateHR } = require('../middleware/authMiddleware');
 
+// Create new HR user
+router.post('/add', async (req, res) => {
+    try {
+        const { walletAddress, name, email } = req.body;
+
+        if (!walletAddress || !name || !email) {
+            return res.status(400).json({ 
+                error: 'Wallet address, name, and email are required' 
+            });
+        }
+
+        // Check if HR user with this wallet already exists
+        const { data: existingUser, error: checkError } = await supabase
+            .from('hr_users')
+            .select('wallet')
+            .eq('wallet', walletAddress.toLowerCase())
+            .single();
+
+        if (existingUser) {
+            return res.status(400).json({ error: 'HR user with this wallet address already exists' });
+        }
+
+        // Check if HR user with this email already exists
+        const { data: existingEmail, error: emailCheckError } = await supabase
+            .from('hr_users')
+            .select('email')
+            .eq('email', email)
+            .single();
+
+        if (existingEmail) {
+            return res.status(400).json({ error: 'HR user with this email already exists' });
+        }
+
+        // Insert new HR user
+        const { data, error } = await supabase
+            .from('hr_users')
+            .insert([
+                {
+                    wallet: walletAddress.toLowerCase(),
+                    name,
+                    email
+                }
+            ])
+            .select()
+            .single();
+
+        if (error) {
+            console.error('❌ Error adding HR user:', error);
+            return res.status(500).json({ error: error.message || 'Failed to create HR user' });
+        }
+
+        console.log('✅ HR user added successfully:', data.email);
+
+        res.status(201).json({
+            message: 'HR user added successfully',
+            user: data
+        });
+    } catch (error) {
+        console.error('❌ Error in add HR endpoint:', error);
+        res.status(500).json({
+            error: error.message || 'Failed to add HR user'
+        });
+    }
+});
+
 // Get all HR users (for testing)
 router.get('/all', async (req, res) => {
     try {

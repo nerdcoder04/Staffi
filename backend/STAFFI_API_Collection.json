@@ -1,0 +1,662 @@
+{
+  "info": {
+    "_postman_id": "c97f1e12-5b62-4542-8e0a-5e89bce7c4df",
+    "name": "STAFFI API",
+    "description": "API collection for STAFFI - Smart Employee and HR Management System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "HR Login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"walletAddress\": \"{{hr_wallet}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/hr-login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "hr-login"
+              ]
+            },
+            "description": "Authenticates an HR user using their wallet address"
+          },
+          "response": []
+        },
+        {
+          "name": "Employee Signup",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"employee@example.com\",\n    \"password\": \"securepassword\",\n    \"name\": \"Employee Name\",\n    \"role\": \"DEVELOPER\",\n    \"department\": \"ENGINEERING\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/employee/signup",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "employee",
+                "signup"
+              ]
+            },
+            "description": "Registers a new employee account"
+          },
+          "response": []
+        },
+        {
+          "name": "Employee Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData && jsonData.token) {",
+                  "    pm.environment.set(\"employee_token\", jsonData.token);",
+                  "    pm.environment.set(\"employee_id\", jsonData.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"employee@example.com\",\n    \"password\": \"securepassword\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/employee/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "employee",
+                "login"
+              ]
+            },
+            "description": "Authenticates an employee using email and password"
+          },
+          "response": []
+        }
+      ],
+      "description": "Authentication endpoints for both HR and employee users"
+    },
+    {
+      "name": "2. HR Management",
+      "item": [
+        {
+          "name": "Create HR User",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"walletAddress\": \"0x123abc456def789ghi...\",\n    \"name\": \"New HR Name\",\n    \"email\": \"newhr@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/hr/add",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "hr",
+                "add"
+              ]
+            },
+            "description": "Creates a new HR user with wallet authentication"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All HR Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/hr/all",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "hr",
+                "all"
+              ]
+            },
+            "description": "Lists all HR users"
+          },
+          "response": []
+        },
+        {
+          "name": "Get HR User Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Wallet-Address",
+                "value": "{{hr_wallet}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/hr/details",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "hr",
+                "details"
+              ]
+            },
+            "description": "Get details of the authenticated HR user"
+          },
+          "response": []
+        },
+        {
+          "name": "Add Employee",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Wallet-Address",
+                "value": "{{hr_wallet}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"New Employee\",\n    \"email\": \"newemployee@example.com\",\n    \"password\": \"securepassword\",\n    \"role\": \"DEVELOPER\",\n    \"department\": \"ENGINEERING\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/employee/add",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "employee",
+                "add"
+              ]
+            },
+            "description": "Adds a new employee (HR only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Employees",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Wallet-Address",
+                "value": "{{hr_wallet}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/employee/all",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "employee",
+                "all"
+              ]
+            },
+            "description": "Lists all employees (HR only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Employee by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Wallet-Address",
+                "value": "{{hr_wallet}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/employee/{{employee_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "employee",
+                "{{employee_id}}"
+              ]
+            },
+            "description": "Get details of a specific employee (HR only)"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints for HR user management and employee management by HR"
+    },
+    {
+      "name": "3. Employee Self-Management",
+      "item": [
+        {
+          "name": "Connect Wallet",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{employee_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"walletAddress\": \"0x123abc456def789ghi...\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/employee/wallet/connect",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "employee",
+                "wallet",
+                "connect"
+              ]
+            },
+            "description": "Connect a wallet address to the authenticated employee's account"
+          },
+          "response": []
+        },
+        {
+          "name": "Disconnect Wallet",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{employee_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/employee/wallet/disconnect",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "employee",
+                "wallet",
+                "disconnect"
+              ]
+            },
+            "description": "Remove wallet address from the authenticated employee's account"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints for employee self-management"
+    },
+    {
+      "name": "4. Reference Data",
+      "item": [
+        {
+          "name": "Get All Roles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/employee/roles",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "employee",
+                "roles"
+              ]
+            },
+            "description": "Lists all available employee roles"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Departments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/employee/departments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "employee",
+                "departments"
+              ]
+            },
+            "description": "Lists all available departments"
+          },
+          "response": []
+        }
+      ],
+      "description": "Reference data endpoints for roles and departments"
+    },
+    {
+      "name": "5. Admin - Role Management",
+      "item": [
+        {
+          "name": "Get All Roles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/roles",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "roles"
+              ]
+            },
+            "description": "Lists all available roles"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Role",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Wallet-Address",
+                "value": "{{hr_wallet}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"role_name\": \"TESTER\",\n    \"description\": \"Quality assurance tester\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/roles",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "roles"
+              ]
+            },
+            "description": "Create a new role (HR only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Role",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "X-Wallet-Address",
+                "value": "{{hr_wallet}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"role_name\": \"QA_ENGINEER\",\n    \"description\": \"Quality assurance engineer\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/roles/11",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "roles",
+                "11"
+              ]
+            },
+            "description": "Update an existing role (HR only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Role",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-Wallet-Address",
+                "value": "{{hr_wallet}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/roles/11",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "roles",
+                "11"
+              ]
+            },
+            "description": "Delete an existing role (HR only). Only possible if no employees have this role."
+          },
+          "response": []
+        }
+      ],
+      "description": "API endpoints for managing employee roles"
+    },
+    {
+      "name": "6. Admin - Department Management",
+      "item": [
+        {
+          "name": "Get All Departments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/departments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "departments"
+              ]
+            },
+            "description": "Lists all available departments"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Department",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Wallet-Address",
+                "value": "{{hr_wallet}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"dept_name\": \"RESEARCH\",\n    \"description\": \"Research and development\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/departments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "departments"
+              ]
+            },
+            "description": "Create a new department (HR only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Department",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "X-Wallet-Address",
+                "value": "{{hr_wallet}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"dept_name\": \"R_AND_D\",\n    \"description\": \"Research and Development\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/departments/9",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "departments",
+                "9"
+              ]
+            },
+            "description": "Update an existing department (HR only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Department",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-Wallet-Address",
+                "value": "{{hr_wallet}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/departments/9",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "departments",
+                "9"
+              ]
+            },
+            "description": "Delete an existing department (HR only). Only possible if no employees belong to this department."
+          },
+          "response": []
+        }
+      ],
+      "description": "API endpoints for managing departments"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000/api",
+      "type": "string"
+    },
+    {
+      "key": "hr_wallet",
+      "value": "0x123abc456def789ghi...",
+      "type": "string"
+    }
+  ]
+} 

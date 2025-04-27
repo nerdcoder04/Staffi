@@ -1,4 +1,8 @@
 const supabase = require('../utils/supabaseClient');
+const jwt = require('jsonwebtoken');
+
+// Secret key for JWT tokens (must match the one in authRoutes.js)
+const JWT_SECRET = process.env.JWT_SECRET || 'staffi-secret-key-replace-in-production';
 
 const authenticateHR = async (req, res, next) => {
     try {
@@ -46,21 +50,33 @@ const authenticateEmployee = async (req, res, next) => {
         }
 
         const token = authHeader.split(' ')[1];
-        const { data: { user }, error } = await supabase.auth.getUser(token);
-
-        if (error) {
-            console.error('❌ Token validation error:', error);
+        
+        try {
+            // Verify the JWT token
+            const decoded = jwt.verify(token, JWT_SECRET);
+            
+            // Get employee details from database
+            const { data: employee, error } = await supabase
+                .from('employees')
+                .select('*')
+                .eq('id', decoded.id)
+                .single();
+                
+            if (error || !employee) {
+                console.log('❌ No employee found with ID:', decoded.id);
+                return res.status(401).json({ error: 'Invalid or expired token' });
+            }
+            
+            // Remove password from employee object
+            delete employee.password;
+            
+            console.log('✅ Employee authentication successful for:', employee.email);
+            req.employee = employee;
+            next();
+        } catch (tokenError) {
+            console.error('❌ Token validation error:', tokenError);
             return res.status(401).json({ error: 'Invalid or expired token' });
         }
-
-        if (!user) {
-            console.log('❌ No user found for token');
-            return res.status(401).json({ error: 'Invalid or expired token' });
-        }
-
-        console.log('✅ Employee authentication successful for:', user.email);
-        req.employee = user;
-        next();
     } catch (error) {
         console.error('❌ Employee Authentication Error:', error);
         res.status(500).json({ error: 'Internal server error' });

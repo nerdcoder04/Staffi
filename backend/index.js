@@ -4,6 +4,7 @@ const { authenticateHR, authenticateEmployee } = require('./middleware/authMiddl
 const authRoutes = require('./routes/authRoutes');
 const hrRoutes = require('./routes/hrRoutes');
 const employeeRoutes = require('./routes/employeeRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 const supabase = require('./utils/supabaseClient');
 
 const app = express();
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/hr', hrRoutes);
 app.use('/api/employee', employeeRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Protected Routes for Testing
 app.get('/api/protected/hr-route', authenticateHR, (req, res) => {
