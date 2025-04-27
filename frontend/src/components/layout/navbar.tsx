@@ -1,19 +1,20 @@
 
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { Wallet } from "lucide-react";
 import StaffiButton from "@/components/ui/staffi-button";
+import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isWalletConnected, setIsWalletConnected] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 10) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
+      setIsScrolled(window.scrollY > 10);
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -22,8 +23,41 @@ const Navbar = () => {
     };
   }, []);
 
+  const handleWalletConnect = () => {
+    setIsWalletConnected(true);
+    toast.success("Wallet Connected Successfully!", {
+      description: "Redirecting to dashboard...",
+      duration: 2000,
+    });
+    
+    // Navigate to dashboard after a slight delay
+    setTimeout(() => {
+      navigate('/dashboard');
+    }, 2000);
+  };
+
+  const handleNavigation = (path: string) => {
+    if (path.startsWith('#')) {
+      // Smooth scroll to section
+      const element = document.querySelector(path);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      navigate(path);
+    }
+    
+    // Close mobile menu if open
+    if (isMenuOpen) {
+      setIsMenuOpen(false);
+    }
+  };
+
   return (
-    <nav
+    <motion.nav
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ type: "spring", stiffness: 300, damping: 30 }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
           ? "py-3 glass-effect"
@@ -43,17 +77,32 @@ const Navbar = () => {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-6">
-          <Link to="/" className="text-sm font-medium hover:text-staffi-purple transition-colors">
+          <button 
+            onClick={() => handleNavigation('/')} 
+            className="text-sm font-medium hover:text-staffi-purple transition-colors"
+          >
             Home
-          </Link>
-          <Link to="/features" className="text-sm font-medium hover:text-staffi-purple transition-colors">
+          </button>
+          <button 
+            onClick={() => handleNavigation('#features')} 
+            className="text-sm font-medium hover:text-staffi-purple transition-colors"
+          >
             Features
-          </Link>
-          <Link to="/about" className="text-sm font-medium hover:text-staffi-purple transition-colors">
-            About
-          </Link>
-          <StaffiButton variant="primary" size="sm">
-            Connect Wallet
+          </button>
+          <button 
+            onClick={() => handleNavigation('#how-it-works')} 
+            className="text-sm font-medium hover:text-staffi-purple transition-colors"
+          >
+            How It Works
+          </button>
+          <StaffiButton 
+            variant={isWalletConnected ? "outline" : "primary"} 
+            size="sm"
+            onClick={handleWalletConnect}
+            className="flex items-center gap-2"
+          >
+            <Wallet className="w-4 h-4" />
+            {isWalletConnected ? "Connected" : "Connect Wallet"}
           </StaffiButton>
         </div>
 
@@ -79,49 +128,64 @@ const Navbar = () => {
         </button>
 
         {/* Mobile Navigation */}
-        <div
-          className={`fixed top-0 left-0 w-full h-full bg-white transform transition-transform ease-in-out duration-300 md:hidden ${
-            isMenuOpen ? "translate-x-0" : "translate-x-full"
-          } z-50`}
-        >
-          <div className="flex justify-between items-center p-6 border-b">
-            <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-staffi-purple to-staffi-blue">
-              STAFFI
-            </span>
-            <button onClick={() => setIsMenuOpen(false)}>
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </div>
-          <div className="flex flex-col p-6 space-y-6">
-            <Link to="/" className="text-lg font-medium" onClick={() => setIsMenuOpen(false)}>
-              Home
-            </Link>
-            <Link to="/features" className="text-lg font-medium" onClick={() => setIsMenuOpen(false)}>
-              Features
-            </Link>
-            <Link to="/about" className="text-lg font-medium" onClick={() => setIsMenuOpen(false)}>
-              About
-            </Link>
-            <StaffiButton variant="primary" onClick={() => setIsMenuOpen(false)}>
-              Connect Wallet
-            </StaffiButton>
-          </div>
-        </div>
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="fixed top-0 left-0 w-full h-full bg-white z-50"
+            >
+              <div className="flex justify-between items-center p-6 border-b">
+                <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-staffi-purple to-staffi-blue">
+                  STAFFI
+                </span>
+                <button onClick={() => setIsMenuOpen(false)}>
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <div className="flex flex-col p-6 space-y-6">
+                <button 
+                  className="text-lg font-medium" 
+                  onClick={() => handleNavigation('/')}
+                >
+                  Home
+                </button>
+                <button 
+                  className="text-lg font-medium" 
+                  onClick={() => handleNavigation('#features')}
+                >
+                  Features
+                </button>
+                <button 
+                  className="text-lg font-medium" 
+                  onClick={() => handleNavigation('#how-it-works')}
+                >
+                  How It Works
+                </button>
+                <StaffiButton variant="primary" onClick={handleWalletConnect}>
+                  Connect Wallet
+                </StaffiButton>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-    </nav>
+    </motion.nav>
   );
 };
 

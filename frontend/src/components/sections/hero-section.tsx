@@ -1,10 +1,14 @@
-
 import { useRef, useEffect } from "react";
 import StaffiButton from "@/components/ui/staffi-button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { motion } from "framer-motion";
+import { useMetaMask } from "@/contexts/MetaMaskContext";
 
 const HeroSection = () => {
   const heroRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const { isConnected, account, openModal } = useMetaMask();
   
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -32,34 +36,110 @@ const HeroSection = () => {
     };
   }, []);
 
+  const handleConnectWallet = async () => {
+    if (isConnected) {
+      navigate('/dashboard');
+      return;
+    }
+    
+    try {
+      openModal();
+      toast.success("Select your wallet to continue", {
+        description: "Connect with MetaMask to access the dashboard",
+        duration: 2000,
+        position: "bottom-center",
+        className: "bg-white text-gray-900"
+      });
+    } catch (error) {
+      toast.error("Failed to open wallet selection", {
+        description: "Please try again",
+        duration: 3000,
+        position: "bottom-center",
+        className: "bg-white text-gray-900"
+      });
+    }
+  };
+
+  const handleLearnMore = () => {
+    // Smooth scroll to features section
+    document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <section className="relative min-h-screen flex items-center pt-20">
-      {/* Background decorative elements */}
-      <div className="absolute top-20 right-10 w-32 h-32 bg-staffi-purple rounded-full opacity-10 animate-float"></div>
-      <div className="absolute bottom-20 left-10 w-24 h-24 bg-staffi-blue rounded-full opacity-10 animate-float" style={{ animationDelay: '1s' }}></div>
+      {/* Background decorative elements with animation */}
+      <motion.div 
+        className="absolute top-20 right-10 w-32 h-32 bg-staffi-purple rounded-full opacity-10" 
+        animate={{ 
+          y: [0, -30, 0], 
+          scale: [1, 1.1, 1],
+          opacity: [0.1, 0.15, 0.1] 
+        }}
+        transition={{ 
+          duration: 8, 
+          repeat: Infinity,
+          repeatType: "reverse" 
+        }}
+      />
+      
+      <motion.div 
+        className="absolute bottom-20 left-10 w-24 h-24 bg-staffi-blue rounded-full opacity-10" 
+        animate={{ 
+          y: [0, 20, 0], 
+          scale: [1, 1.15, 1],
+          opacity: [0.1, 0.2, 0.1] 
+        }}
+        transition={{ 
+          duration: 6, 
+          repeat: Infinity,
+          repeatType: "reverse",
+          delay: 1
+        }}
+      />
       
       <div className="container mx-auto px-4 py-20">
         <div 
           ref={heroRef} 
           className="max-w-5xl mx-auto text-center transition-all duration-1000 opacity-0 translate-y-10"
         >
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+          <motion.h1 
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight"
+          >
             <span className="text-gradient">STAFFI</span> - A Web3-enabled HR Management System
-          </h1>
-          <p className="text-xl md:text-2xl text-gray-600 mb-10 max-w-3xl mx-auto">
+          </motion.h1>
+          
+          <motion.p 
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="text-xl md:text-2xl text-gray-600 mb-10 max-w-3xl mx-auto"
+          >
             Empowering companies with blockchain security, AI insights, and automated HR processes.
-          </p>
+          </motion.p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-            <StaffiButton size="lg">
-              Connect Wallet
+          <motion.div 
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+            className="flex flex-col sm:flex-row gap-4 justify-center mb-16"
+          >
+            <StaffiButton size="lg" onClick={handleConnectWallet}>
+              {isConnected ? `Dashboard` : 'Connect Wallet'}
             </StaffiButton>
-            <StaffiButton variant="outline" size="lg">
+            <StaffiButton variant="outline" size="lg" onClick={handleLearnMore}>
               Learn More
             </StaffiButton>
-          </div>
+          </motion.div>
 
-          <div className="flex flex-col md:flex-row justify-center items-center gap-8 bg-white rounded-2xl shadow-xl p-8 border border-gray-100 w-fit mx-auto">
+          <motion.div 
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.8 }}
+            className="flex flex-col md:flex-row justify-center items-center gap-8 bg-white rounded-2xl shadow-xl p-8 border border-gray-100 w-fit mx-auto"
+          >
             <div className="flex flex-col items-center">
               <div className="text-4xl font-bold text-staffi-purple mb-2">100%</div>
               <div className="text-gray-600">Secure & Transparent</div>
@@ -74,10 +154,10 @@ const HeroSection = () => {
               <div className="text-4xl font-bold text-staffi-purple mb-2">NFT</div>
               <div className="text-gray-600">Certifications</div>
             </div>
-          </div>
+          </motion.div>
           
           <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
-            <Link to="#features" className="text-gray-400 hover:text-staffi-purple">
+            <Link to="#features" id="features" className="text-gray-400 hover:text-staffi-purple">
               <svg 
                 className="w-6 h-6" 
                 fill="none" 
