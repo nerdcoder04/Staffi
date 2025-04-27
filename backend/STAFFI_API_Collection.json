@@ -1938,7 +1938,7 @@
           ]
         },
         {
-          "name": "6. Admin - Role Management",
+          "name": "4. Admin - Role Management",
           "id": 3593714,
           "auth": {},
           "securityScheme": {},
@@ -2760,7 +2760,7 @@
           ]
         },
         {
-          "name": "7. Admin - Department Management",
+          "name": "5. Admin - Department Management",
           "id": 3593715,
           "auth": {},
           "securityScheme": {},
