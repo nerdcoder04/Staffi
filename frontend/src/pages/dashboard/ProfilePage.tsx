@@ -1,0 +1,797 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useMetaMask } from '@/contexts/MetaMaskContext';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ProgressCard } from "@/components/dashboard/progress-card";
+import { StatCard } from "@/components/dashboard/stat-card";
+import { useToast } from "@/hooks/use-toast";
+import { 
+  User, 
+  Briefcase, 
+  Mail, 
+  Phone, 
+  MapPin, 
+  Calendar, 
+  Bell, 
+  Globe,
+  Wallet,
+  Save,
+  FileText,
+  Award,
+  Star,
+  ChevronUp,
+  ChevronDown,
+  Upload,
+  LogOut,
+  Settings,
+  Check
+} from "lucide-react";
+
+const ProfilePage = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { account, connect, disconnect, balance } = useMetaMask();
+  const [activeTab, setActiveTab] = useState("profile");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [dialogType, setDialogType] = useState("");
+  const [expanded, setExpanded] = useState({
+    skills: false,
+    achievements: false,
+    certifications: false
+  });
+
+  const handleEditProfile = () => {
+    setDialogType("edit-profile");
+    setIsDialogOpen(true);
+  };
+
+  const handleUploadDocument = () => {
+    setDialogType("upload-document");
+    setIsDialogOpen(true);
+  };
+
+  const handleSettingsClick = () => {
+    setDialogType("settings");
+    setIsDialogOpen(true);
+  };
+
+  const handleDisconnectWallet = () => {
+    disconnect();
+    toast({
+      title: "Wallet Disconnected",
+      description: "Your MetaMask wallet has been disconnected.",
+    });
+  };
+
+  const handleConnectWallet = async () => {
+    try {
+      await connect();
+      toast({
+        title: "Wallet Connected",
+        description: "Your MetaMask wallet has been connected successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Connection Failed",
+        description: "Failed to connect your wallet. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleToggleExpand = (section: keyof typeof expanded) => {
+    setExpanded(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
+  const formatAddress = (address: string) => {
+    return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+  };
+
+  const mockSkills = [
+    { name: "Leadership", level: 95 },
+    { name: "Project Management", level: 92 },
+    { name: "Strategic Planning", level: 78 },
+    { name: "Team Building", level: 88 },
+    { name: "Communication", level: 90 },
+    { name: "Problem Solving", level: 83 }
+  ];
+
+  const mockAchievements = [
+    { title: "Employee of the Month", date: "March 2025", icon: <Award className="h-5 w-5 text-amber-500" /> },
+    { title: "Outstanding Project Lead", date: "January 2025", icon: <Star className="h-5 w-5 text-amber-500" /> },
+    { title: "Perfect Attendance", date: "2024", icon: <Check className="h-5 w-5 text-green-500" /> },
+    { title: "Innovation Award", date: "December 2024", icon: <Award className="h-5 w-5 text-amber-500" /> }
+  ];
+
+  const mockCertifications = [
+    { name: "HR Management Professional", issuer: "SHRM", date: "June 2024", expires: "June 2027" },
+    { name: "Project Management Professional", issuer: "PMI", date: "August 2023", expires: "August 2026" },
+    { name: "Leadership & Communication", issuer: "Staffi Academy", date: "February 2024", expires: "N/A" }
+  ];
+
+  return (
+    <div className="container mx-auto py-8 animate-fade-in">
+      <div className="grid grid-cols-12 gap-6">
+        {/* Profile Sidebar */}
+        <div className="col-span-12 md:col-span-4 space-y-6">
+          {/* Profile Card */}
+          <Card className="border-0 shadow-md overflow-hidden">
+            <CardContent className="p-0">
+              <div className="h-32 bg-gradient-to-r from-staffi-purple to-staffi-blue"></div>
+              <div className="px-6 pb-6 pt-0 relative">
+                <Avatar className="h-24 w-24 border-4 border-white -mt-12">
+                  <AvatarImage src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&h=256&q=80" />
+                  <AvatarFallback>SW</AvatarFallback>
+                </Avatar>
+                <div className="absolute top-2 right-4 space-x-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="bg-white hover:bg-gray-100"
+                    onClick={handleEditProfile}
+                  >
+                    Edit Profile
+                  </Button>
+                </div>
+                <div className="mt-3">
+                  <h2 className="text-2xl font-bold">Sarah Williams</h2>
+                  <p className="text-gray-500">HR Manager</p>
+                  
+                  <div className="flex items-center mt-4">
+                    <Badge variant="outline" className="bg-staffi-purple-light text-staffi-purple border-staffi-purple">
+                      HR Professional
+                    </Badge>
+                    <Badge variant="outline" className="ml-2 bg-amber-100 text-amber-600 border-amber-200">
+                      Team Lead
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Contact Information */}
+          <Card className="border-0 shadow-md">
+            <CardHeader>
+              <CardTitle className="text-lg font-medium">Contact Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center">
+                <Mail className="h-5 w-5 text-gray-500 mr-2" />
+                <span>sarahwilliams@staffi.com</span>
+              </div>
+              <div className="flex items-center">
+                <Phone className="h-5 w-5 text-gray-500 mr-2" />
+                <span>+1 (555) 123-4567</span>
+              </div>
+              <div className="flex items-center">
+                <MapPin className="h-5 w-5 text-gray-500 mr-2" />
+                <span>San Francisco, CA</span>
+              </div>
+              <div className="flex items-center">
+                <Calendar className="h-5 w-5 text-gray-500 mr-2" />
+                <span>Joined January 2022</span>
+              </div>
+              <div className="flex items-center">
+                <Globe className="h-5 w-5 text-gray-500 mr-2" />
+                <span>English, Spanish</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Wallet Information */}
+          <Card className="border-0 shadow-md">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg font-medium">Wallet</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {account ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Wallet className="h-5 w-5 text-staffi-purple mr-2" />
+                      <span className="font-medium">{formatAddress(account)}</span>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                      onClick={handleDisconnectWallet}
+                    >
+                      <LogOut className="h-4 w-4 mr-1" />
+                      Disconnect
+                    </Button>
+                  </div>
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">ETH Balance</span>
+                      <span className="font-bold">{balance || "0.00"} ETH</span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-3">
+                  <p className="text-gray-500 mb-3">No wallet connected</p>
+                  <Button onClick={handleConnectWallet} className="bg-staffi-purple hover:bg-staffi-purple-dark">
+                    <Wallet className="h-4 w-4 mr-2" />
+                    Connect Wallet
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* NFT Score Card */}
+          <Card className="border-0 shadow-md">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg font-medium">Staffi NFT Score</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-gray-500 text-sm">Current Score</p>
+                  <p className="text-3xl font-bold text-staffi-purple">752</p>
+                </div>
+                <div className="h-20 w-20 rounded-full bg-staffi-purple/10 flex items-center justify-center">
+                  <Star className="h-10 w-10 text-staffi-purple" />
+                </div>
+              </div>
+              <div className="mt-4">
+                <p className="text-sm text-gray-500 mb-1">Score Breakdown</p>
+                <div className="space-y-2">
+                  <div>
+                    <div className="flex justify-between text-sm">
+                      <span>Performance</span>
+                      <span>320 pts</span>
+                    </div>
+                    <div className="h-1.5 bg-gray-200 rounded-full mt-1">
+                      <div className="h-1.5 bg-staffi-purple rounded-full" style={{ width: "80%" }}></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-sm">
+                      <span>Engagement</span>
+                      <span>242 pts</span>
+                    </div>
+                    <div className="h-1.5 bg-gray-200 rounded-full mt-1">
+                      <div className="h-1.5 bg-amber-500 rounded-full" style={{ width: "65%" }}></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-sm">
+                      <span>Innovation</span>
+                      <span>190 pts</span>
+                    </div>
+                    <div className="h-1.5 bg-gray-200 rounded-full mt-1">
+                      <div className="h-1.5 bg-green-500 rounded-full" style={{ width: "50%" }}></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Quick Actions */}
+          <Card className="border-0 shadow-md">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg font-medium">Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-3">
+                <Button 
+                  variant="outline" 
+                  className="flex flex-col h-auto py-3"
+                  onClick={handleUploadDocument}
+                >
+                  <Upload className="h-5 w-5 mb-1" />
+                  <span className="text-xs">Upload Documents</span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="flex flex-col h-auto py-3"
+                  onClick={handleSettingsClick}
+                >
+                  <Settings className="h-5 w-5 mb-1" />
+                  <span className="text-xs">Settings</span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="flex flex-col h-auto py-3"
+                  onClick={() => {
+                    toast({
+                      title: "Reports Generated",
+                      description: "Your performance reports have been generated",
+                    });
+                  }}
+                >
+                  <FileText className="h-5 w-5 mb-1" />
+                  <span className="text-xs">Performance</span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="flex flex-col h-auto py-3"
+                  onClick={() => {
+                    toast({
+                      title: "Certificate Management",
+                      description: "Opening certificate management",
+                    });
+                    navigate("/dashboard/certificates");
+                  }}
+                >
+                  <Award className="h-5 w-5 mb-1" />
+                  <span className="text-xs">Certificates</span>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Content */}
+        <div className="col-span-12 md:col-span-8 space-y-6">
+          <Tabs defaultValue="profile" value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-3 mb-6">
+              <TabsTrigger value="profile">Profile</TabsTrigger>
+              <TabsTrigger value="performance">Performance</TabsTrigger>
+              <TabsTrigger value="documents">Documents</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="profile" className="space-y-6">
+              {/* Stats Row */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <StatCard 
+                  title="Total Experience" 
+                  value="6.5 years" 
+                  icon={<Briefcase className="h-5 w-5 text-staffi-purple" />}
+                  animate
+                  delay={0}
+                />
+                <StatCard 
+                  title="Completed Projects" 
+                  value="47" 
+                  icon={<FileText className="h-5 w-5 text-staffi-blue" />}
+                  animate
+                  delay={1}
+                />
+                <StatCard 
+                  title="Impact Score" 
+                  value="92/100"
+                  icon={<Star className="h-5 w-5 text-amber-500" />} 
+                  animate
+                  delay={2}
+                />
+              </div>
+              
+              {/* Skills Section */}
+              <Card className="border-0 shadow-md">
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-center">
+                    <CardTitle className="text-lg font-medium">Skills & Expertise</CardTitle>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleToggleExpand('skills')}
+                    >
+                      {expanded.skills ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className={expanded.skills ? "space-y-4" : "space-y-4 max-h-64 overflow-hidden"}>
+                    {mockSkills.map((skill, i) => (
+                      <div key={i}>
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-sm font-medium">{skill.name}</span>
+                          <span className="text-sm text-gray-500">{skill.level}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-staffi-purple h-2 rounded-full" 
+                            style={{width: `${skill.level}%`}}
+                          ></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Achievements */}
+              <Card className="border-0 shadow-md">
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-center">
+                    <CardTitle className="text-lg font-medium">Achievements</CardTitle>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleToggleExpand('achievements')}
+                    >
+                      {expanded.achievements ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className={expanded.achievements ? "space-y-4" : "space-y-4 max-h-48 overflow-hidden"}>
+                    {mockAchievements.map((achievement, i) => (
+                      <div key={i} className="flex items-start space-x-3 pb-3 border-b last:border-0 border-gray-100">
+                        <div className="p-2 bg-gray-100 rounded-full">
+                          {achievement.icon}
+                        </div>
+                        <div>
+                          <h4 className="font-medium">{achievement.title}</h4>
+                          <p className="text-sm text-gray-500">{achievement.date}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Certifications */}
+              <Card className="border-0 shadow-md">
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-center">
+                    <CardTitle className="text-lg font-medium">Certifications</CardTitle>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleToggleExpand('certifications')}
+                    >
+                      {expanded.certifications ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className={expanded.certifications ? "space-y-4" : "space-y-4 max-h-48 overflow-hidden"}>
+                    {mockCertifications.map((cert, i) => (
+                      <div key={i} className="p-3 bg-gray-50 rounded-lg">
+                        <h4 className="font-medium">{cert.name}</h4>
+                        <div className="flex justify-between mt-1">
+                          <p className="text-sm text-gray-500">Issued by {cert.issuer}</p>
+                          <p className="text-sm text-gray-500">
+                            {cert.date} - {cert.expires}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+                <CardFooter className="border-t pt-4">
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => {
+                      navigate("/dashboard/certificates");
+                      toast({
+                        title: "Certificates",
+                        description: "Opening certificates management",
+                      });
+                    }}
+                  >
+                    View All Certificates
+                  </Button>
+                </CardFooter>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="performance" className="space-y-6">
+              {/* Performance Overview */}
+              <Card className="border-0 shadow-md">
+                <CardHeader>
+                  <CardTitle>Performance Overview</CardTitle>
+                  <CardDescription>Current quarter performance metrics</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium">Overall Rating</p>
+                      <div className="flex items-center">
+                        <div className="text-3xl font-bold">4.8</div>
+                        <div className="text-lg text-gray-500 ml-1">/5.0</div>
+                        <div className="ml-2 flex">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star 
+                              key={star} 
+                              className={star <= 4 
+                                ? "h-5 w-5 fill-amber-500 text-amber-500" 
+                                : star === 5 
+                                  ? "h-5 w-5 fill-amber-500 text-amber-500 opacity-80" 
+                                  : "h-5 w-5 text-gray-300"
+                              } 
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium">Completed Tasks</p>
+                      <div className="text-3xl font-bold">42/45</div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-green-500 h-2 rounded-full" style={{width: '93%'}}></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h4 className="font-medium">Performance Categories</h4>
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm">Leadership</span>
+                        <span className="text-sm font-medium">92%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
+                        <div className="bg-staffi-purple h-2 rounded-full" style={{width: '92%'}}></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm">Communication</span>
+                        <span className="text-sm font-medium">88%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
+                        <div className="bg-staffi-blue h-2 rounded-full" style={{width: '88%'}}></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm">Time Management</span>
+                        <span className="text-sm font-medium">95%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
+                        <div className="bg-green-500 h-2 rounded-full" style={{width: '95%'}}></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm">Problem Solving</span>
+                        <span className="text-sm font-medium">85%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-amber-500 h-2 rounded-full" style={{width: '85%'}}></div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter className="border-t pt-4">
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => {
+                      toast({
+                        title: "Performance Reports",
+                        description: "Generating full performance reports",
+                      });
+                    }}
+                  >
+                    Generate Performance Report
+                  </Button>
+                </CardFooter>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="documents" className="space-y-6">
+              <Card className="border-0 shadow-md">
+                <CardHeader>
+                  <CardTitle>Documents</CardTitle>
+                  <CardDescription>Manage your documents and records</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {[
+                      { name: "Employment Contract", date: "Jan 15, 2022", type: "PDF" },
+                      { name: "Performance Review Q4 2024", date: "Dec 20, 2024", type: "PDF" },
+                      { name: "Training Certificate", date: "Mar 10, 2024", type: "PDF" },
+                      { name: "Tax Documents 2024", date: "Apr 05, 2024", type: "PDF" },
+                      { name: "Benefits Enrollment", date: "Jan 05, 2024", type: "PDF" }
+                    ].map((doc, i) => (
+                      <div key={i} className="flex items-center justify-between p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded bg-red-100">
+                            <FileText className="h-5 w-5 text-red-600" />
+                          </div>
+                          <div>
+                            <p className="font-medium">{doc.name}</p>
+                            <p className="text-sm text-gray-500">Uploaded: {doc.date}</p>
+                          </div>
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => {
+                            toast({
+                              title: "Document Viewed",
+                              description: `Viewing ${doc.name}`,
+                            });
+                          }}
+                        >
+                          View
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+                <CardFooter className="border-t pt-4 flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    className="flex-1"
+                    onClick={handleUploadDocument}
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload Document
+                  </Button>
+                  <Button 
+                    variant="default" 
+                    className="flex-1 bg-staffi-purple hover:bg-staffi-purple-dark"
+                    onClick={() => {
+                      toast({
+                        title: "Document Request",
+                        description: "Your document request has been sent",
+                      });
+                    }}
+                  >
+                    Request Document
+                  </Button>
+                </CardFooter>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
+
+      {/* Dialogs */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {dialogType === "edit-profile" && "Edit Profile"}
+              {dialogType === "upload-document" && "Upload Document"}
+              {dialogType === "settings" && "Profile Settings"}
+            </DialogTitle>
+            <DialogDescription>
+              {dialogType === "edit-profile" && "Update your profile information"}
+              {dialogType === "upload-document" && "Upload a new document to your profile"}
+              {dialogType === "settings" && "Manage your profile settings"}
+            </DialogDescription>
+          </DialogHeader>
+
+          {dialogType === "edit-profile" && (
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label htmlFor="name" className="text-right text-sm font-medium">Name</label>
+                <input
+                  id="name"
+                  defaultValue="Sarah Williams"
+                  className="col-span-3 h-10 rounded-md border border-gray-300 px-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label htmlFor="title" className="text-right text-sm font-medium">Job Title</label>
+                <input
+                  id="title"
+                  defaultValue="HR Manager"
+                  className="col-span-3 h-10 rounded-md border border-gray-300 px-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label htmlFor="email" className="text-right text-sm font-medium">Email</label>
+                <input
+                  id="email"
+                  defaultValue="sarahwilliams@staffi.com"
+                  type="email"
+                  className="col-span-3 h-10 rounded-md border border-gray-300 px-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label htmlFor="phone" className="text-right text-sm font-medium">Phone</label>
+                <input
+                  id="phone"
+                  defaultValue="+1 (555) 123-4567"
+                  className="col-span-3 h-10 rounded-md border border-gray-300 px-3"
+                />
+              </div>
+            </div>
+          )}
+
+          {dialogType === "upload-document" && (
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label htmlFor="doc-name" className="text-right text-sm font-medium">Document Name</label>
+                <input
+                  id="doc-name"
+                  placeholder="e.g. Employment Contract"
+                  className="col-span-3 h-10 rounded-md border border-gray-300 px-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label htmlFor="doc-type" className="text-right text-sm font-medium">Document Type</label>
+                <select
+                  id="doc-type"
+                  className="col-span-3 h-10 rounded-md border border-gray-300 px-3"
+                >
+                  <option value="contract">Contract</option>
+                  <option value="certificate">Certificate</option>
+                  <option value="review">Performance Review</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label className="text-right text-sm font-medium">File</label>
+                <div className="col-span-3">
+                  <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
+                    <Upload className="h-8 w-8 mx-auto text-gray-400" />
+                    <p className="mt-2 text-sm text-gray-500">Drag and drop or click to browse</p>
+                    <input type="file" className="hidden" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {dialogType === "settings" && (
+            <div className="grid gap-4 py-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Email Notifications</p>
+                  <p className="text-sm text-gray-500">Receive email notifications</p>
+                </div>
+                <Button variant="outline" size="sm">
+                  <Bell className="h-4 w-4 mr-2" />
+                  Configure
+                </Button>
+              </div>
+              <div className="border-t border-gray-200 pt-4 mt-2"></div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Password</p>
+                  <p className="text-sm text-gray-500">Change your password</p>
+                </div>
+                <Button variant="outline" size="sm">Change</Button>
+              </div>
+              <div className="border-t border-gray-200 pt-4 mt-2"></div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Two-Factor Authentication</p>
+                  <p className="text-sm text-gray-500">Add an extra layer of security</p>
+                </div>
+                <Button variant="outline" size="sm">Enable</Button>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+            <Button onClick={() => {
+              setIsDialogOpen(false);
+              toast({
+                title: dialogType === "edit-profile" ? "Profile Updated" : 
+                       dialogType === "upload-document" ? "Document Uploaded" :
+                       "Settings Saved",
+                description: "Your changes have been saved successfully.",
+              });
+            }}>
+              <Save className="h-4 w-4 mr-2" />
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default ProfilePage;

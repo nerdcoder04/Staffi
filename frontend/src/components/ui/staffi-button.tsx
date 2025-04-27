@@ -19,9 +19,9 @@ const StaffiButton = ({
   ...props
 }: StaffiButtonProps & React.ButtonHTMLAttributes<HTMLButtonElement>) => {
   const variants = {
-    primary: "bg-staffi-purple text-white hover:bg-staffi-purple-dark",
-    secondary: "bg-staffi-blue text-white hover:bg-opacity-90",
-    outline: "bg-transparent border border-staffi-purple text-staffi-purple hover:bg-staffi-purple-light",
+    primary: "bg-staffi-purple text-white hover:bg-staffi-purple-dark shadow-md",
+    secondary: "bg-staffi-blue text-white hover:bg-opacity-90 shadow-md",
+    outline: "bg-transparent border border-staffi-purple text-staffi-purple hover:bg-staffi-purple-light shadow-sm",
     ghost: "bg-transparent text-staffi-purple hover:bg-staffi-purple-light",
     link: "bg-transparent text-staffi-purple underline hover:text-staffi-purple-dark p-0"
   };
@@ -35,7 +35,7 @@ const StaffiButton = ({
   return (
     <button
       className={cn(
-        "font-medium transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-staffi-purple focus:ring-offset-2",
+        "font-medium transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-staffi-purple focus:ring-offset-1",
         variants[variant],
         sizes[size],
         className

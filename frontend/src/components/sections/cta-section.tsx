@@ -1,9 +1,11 @@
 
 import StaffiButton from "@/components/ui/staffi-button";
+import { useMetaMask } from "@/contexts/MetaMaskContext";
 
 const CTASection = () => {
-  return (
-    <section className="py-20 relative overflow-hidden">
+  const { isConnected, openModal } = useMetaMask();
+  
+  return <section className="py-20 relative overflow-hidden">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-staffi-purple/10 to-staffi-blue/10 z-0"></div>
       
@@ -20,8 +22,8 @@ const CTASection = () => {
                 Join the future of HR management with blockchain security and AI insights. Connect your wallet now to get started.
               </p>
               <div className="space-y-4">
-                <StaffiButton size="lg">
-                  Connect Wallet
+                <StaffiButton size="lg" onClick={openModal}>
+                  {isConnected ? 'Go to Dashboard' : 'Connect Wallet'}
                 </StaffiButton>
                 <p className="text-sm text-gray-500 mt-4">
                   No blockchain wallet? 
@@ -65,8 +67,7 @@ const CTASection = () => {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
 
 export default CTASection;
