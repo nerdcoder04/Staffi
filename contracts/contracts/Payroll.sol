@@ -7,15 +7,19 @@ import "./Employee.sol";
 contract Payroll is Ownable {
     Employee public employeeContract;
     
-    event SalarySent(address indexed emp, uint256 amount, uint256 timestamp);
+    event SalarySent(string indexed employeeId, address wallet, uint256 amount, uint256 timestamp);
     
     constructor(address _employeeContract) Ownable(msg.sender) {
         employeeContract = Employee(_employeeContract);
     }
     
-    function logPayroll(address emp, uint256 amount) external onlyOwner {
-        require(employeeContract.isEmployee(emp), "Not a valid employee");
-        emit SalarySent(emp, amount, block.timestamp);
+    function logPayroll(string memory employeeId, uint256 amount) external onlyOwner {
+        require(employeeContract.isEmployee(employeeId), "Not a valid employee");
+        
+        // Get employee record to include wallet in event (optional)
+        Employee.Record memory employee = employeeContract.getEmployeeById(employeeId);
+        
+        emit SalarySent(employeeId, employee.wallet, amount, block.timestamp);
     }
     
     function getEmployeeContract() external view returns (address) {

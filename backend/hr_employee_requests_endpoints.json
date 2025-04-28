@@ -1,0 +1,554 @@
+{
+  "name": "HR Employee Requests",
+  "id": 3593640,
+  "auth": {},
+  "securityScheme": {},
+  "parentId": 0,
+  "serverId": "",
+  "description": "Endpoints for HR to manage employee signup requests",
+  "identityPattern": {
+    "httpApi": {
+      "type": "inherit",
+      "bodyType": "",
+      "fields": []
+    }
+  },
+  "shareSettings": {},
+  "visibility": "INHERITED",
+  "preProcessors": [
+    {
+      "id": "inheritProcessors",
+      "type": "inheritProcessors",
+      "data": {}
+    }
+  ],
+  "postProcessors": [
+    {
+      "id": "inheritProcessors",
+      "type": "inheritProcessors",
+      "data": {}
+    }
+  ],
+  "inheritPostProcessors": {},
+  "inheritPreProcessors": {},
+  "items": [
+    {
+      "name": "Get All Employee Requests",
+      "api": {
+        "id": "16316950",
+        "method": "get",
+        "path": "/hr/employee-requests",
+        "parameters": {
+          "query": [],
+          "path": [],
+          "cookie": [],
+          "header": [
+            {
+              "id": "TgBJ7l6NLT",
+              "name": "X-Wallet-Address",
+              "required": true,
+              "description": "HR Wallet Address",
+              "example": "0x01234568901234567890",
+              "type": "string",
+              "enable": true
+            }
+          ]
+        },
+        "auth": {},
+        "securityScheme": {},
+        "commonParameters": {
+          "query": [],
+          "body": [],
+          "cookie": [],
+          "header": []
+        },
+        "responses": [
+          {
+            "id": "22576680",
+            "code": 200,
+            "name": "Success",
+            "headers": [],
+            "jsonSchema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string"
+                      },
+                      "role": {
+                        "type": "string"
+                      },
+                      "department": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "created_at": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              "x-apidog-orders": [
+                "success",
+                "data"
+              ]
+            },
+            "description": "",
+            "contentType": "json",
+            "mediaType": "",
+            "oasExtensions": ""
+          }
+        ],
+        "responseExamples": [],
+        "requestBody": {
+          "type": "none",
+          "parameters": [],
+          "jsonSchema": {
+            "type": "object",
+            "properties": {},
+            "x-apidog-orders": []
+          },
+          "mediaType": "",
+          "examples": []
+        },
+        "description": "Get all employee signup requests (HR only)",
+        "tags": [],
+        "status": "released",
+        "serverId": "",
+        "operationId": "",
+        "sourceUrl": "",
+        "ordering": 1,
+        "cases": [
+          {
+            "id": 23127090,
+            "type": "http",
+            "path": null,
+            "name": "Success",
+            "responseId": 22576680,
+            "parameters": {
+              "query": [],
+              "path": [],
+              "cookie": [],
+              "header": [
+                {
+                  "id": "UhAH2JphNx",
+                  "relatedId": "TgBJ7l6NLT",
+                  "relatedName": "X-Wallet-Address",
+                  "value": "0x01234568901234567890",
+                  "enable": true,
+                  "isDelete": false
+                }
+              ]
+            },
+            "commonParameters": {
+              "query": [],
+              "body": [],
+              "header": [],
+              "cookie": []
+            },
+            "requestBody": {
+              "parameters": [],
+              "data": "",
+              "type": "none",
+              "generateMode": "normal"
+            },
+            "auth": {},
+            "securityScheme": {},
+            "advancedSettings": {
+              "disabledSystemHeaders": {}
+            },
+            "visibility": "INHERITED",
+            "preProcessors": [],
+            "postProcessors": [],
+            "inheritPostProcessors": {},
+            "inheritPreProcessors": {}
+          }
+        ],
+        "mocks": [],
+        "customApiFields": "{}",
+        "advancedSettings": {
+          "disabledSystemHeaders": {
+            "user-agent": true
+          }
+        },
+        "mockScript": {},
+        "codeSamples": [],
+        "commonResponseStatus": {},
+        "responseChildren": []
+      }
+    },
+    {
+      "name": "Approve Employee Request",
+      "api": {
+        "id": "16316951",
+        "method": "post",
+        "path": "/hr/employee-requests/:id/approve",
+        "parameters": {
+          "query": [],
+          "path": [
+            {
+              "id": "PL1J7l6NLT",
+              "name": "id",
+              "required": true,
+              "description": "Employee Request ID",
+              "example": "a48b66d4-bff7-446e-bde7-85fad694550f",
+              "type": "string",
+              "enable": true
+            }
+          ],
+          "cookie": [],
+          "header": [
+            {
+              "id": "TgBJ7l6NLT",
+              "name": "X-Wallet-Address",
+              "required": true,
+              "description": "HR Wallet Address",
+              "example": "0x01234568901234567890",
+              "type": "string",
+              "enable": true
+            }
+          ]
+        },
+        "auth": {},
+        "securityScheme": {},
+        "commonParameters": {
+          "query": [],
+          "body": [],
+          "cookie": [],
+          "header": []
+        },
+        "responses": [
+          {
+            "id": "22576681",
+            "code": 200,
+            "name": "Success",
+            "headers": [],
+            "jsonSchema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "employee": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "string"
+                    },
+                    "department": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "x-apidog-orders": [
+                "success",
+                "message",
+                "employee"
+              ]
+            },
+            "description": "",
+            "contentType": "json",
+            "mediaType": "",
+            "oasExtensions": ""
+          }
+        ],
+        "responseExamples": [],
+        "requestBody": {
+          "type": "none",
+          "parameters": [],
+          "jsonSchema": {
+            "type": "object",
+            "properties": {},
+            "x-apidog-orders": []
+          },
+          "mediaType": "",
+          "examples": []
+        },
+        "description": "Approve an employee signup request (HR only)",
+        "tags": [],
+        "status": "released",
+        "serverId": "",
+        "operationId": "",
+        "sourceUrl": "",
+        "ordering": 2,
+        "cases": [
+          {
+            "id": 23127091,
+            "type": "http",
+            "path": null,
+            "name": "Success",
+            "responseId": 22576681,
+            "parameters": {
+              "query": [],
+              "path": [
+                {
+                  "id": "UhAH2JphNx",
+                  "relatedId": "PL1J7l6NLT",
+                  "relatedName": "id",
+                  "value": "a48b66d4-bff7-446e-bde7-85fad694550f",
+                  "enable": true,
+                  "isDelete": false
+                }
+              ],
+              "cookie": [],
+              "header": [
+                {
+                  "id": "UhAH2JphNx",
+                  "relatedId": "TgBJ7l6NLT",
+                  "relatedName": "X-Wallet-Address",
+                  "value": "0x01234568901234567890",
+                  "enable": true,
+                  "isDelete": false
+                }
+              ]
+            },
+            "commonParameters": {
+              "query": [],
+              "body": [],
+              "header": [],
+              "cookie": []
+            },
+            "requestBody": {
+              "parameters": [],
+              "data": "",
+              "type": "none",
+              "generateMode": "normal"
+            },
+            "auth": {},
+            "securityScheme": {},
+            "advancedSettings": {
+              "disabledSystemHeaders": {}
+            },
+            "visibility": "INHERITED",
+            "preProcessors": [],
+            "postProcessors": [],
+            "inheritPostProcessors": {},
+            "inheritPreProcessors": {}
+          }
+        ],
+        "mocks": [],
+        "customApiFields": "{}",
+        "advancedSettings": {
+          "disabledSystemHeaders": {
+            "user-agent": true
+          }
+        },
+        "mockScript": {},
+        "codeSamples": [],
+        "commonResponseStatus": {},
+        "responseChildren": []
+      }
+    },
+    {
+      "name": "Reject Employee Request",
+      "api": {
+        "id": "16316952",
+        "method": "post",
+        "path": "/hr/employee-requests/:id/reject",
+        "parameters": {
+          "query": [],
+          "path": [
+            {
+              "id": "PL1J7l6NLT",
+              "name": "id",
+              "required": true,
+              "description": "Employee Request ID",
+              "example": "a48b66d4-bff7-446e-bde7-85fad694550f",
+              "type": "string",
+              "enable": true
+            }
+          ],
+          "cookie": [],
+          "header": [
+            {
+              "id": "TgBJ7l6NLT",
+              "name": "X-Wallet-Address",
+              "required": true,
+              "description": "HR Wallet Address",
+              "example": "0x01234568901234567890",
+              "type": "string",
+              "enable": true
+            }
+          ]
+        },
+        "auth": {},
+        "securityScheme": {},
+        "commonParameters": {
+          "query": [],
+          "body": [],
+          "cookie": [],
+          "header": []
+        },
+        "responses": [
+          {
+            "id": "22576682",
+            "code": 200,
+            "name": "Success",
+            "headers": [],
+            "jsonSchema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "request": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "x-apidog-orders": [
+                "success",
+                "message",
+                "request"
+              ]
+            },
+            "description": "",
+            "contentType": "json",
+            "mediaType": "",
+            "oasExtensions": ""
+          }
+        ],
+        "responseExamples": [],
+        "requestBody": {
+          "type": "application/json",
+          "parameters": [],
+          "jsonSchema": {
+            "type": "object",
+            "properties": {
+              "reason": {
+                "type": "string"
+              }
+            },
+            "x-apidog-orders": [
+              "reason"
+            ]
+          },
+          "mediaType": "",
+          "examples": [
+            {
+              "value": "{\n    \"reason\": \"Position no longer available\"\n}",
+              "mediaType": "application/json",
+              "description": ""
+            }
+          ],
+          "oasExtensions": ""
+        },
+        "description": "Reject an employee signup request (HR only)",
+        "tags": [],
+        "status": "released",
+        "serverId": "",
+        "operationId": "",
+        "sourceUrl": "",
+        "ordering": 3,
+        "cases": [
+          {
+            "id": 23127092,
+            "type": "http",
+            "path": null,
+            "name": "Success",
+            "responseId": 22576682,
+            "parameters": {
+              "query": [],
+              "path": [
+                {
+                  "id": "UhAH2JphNx",
+                  "relatedId": "PL1J7l6NLT",
+                  "relatedName": "id",
+                  "value": "a48b66d4-bff7-446e-bde7-85fad694550f",
+                  "enable": true,
+                  "isDelete": false
+                }
+              ],
+              "cookie": [],
+              "header": [
+                {
+                  "id": "UhAH2JphNx",
+                  "relatedId": "TgBJ7l6NLT",
+                  "relatedName": "X-Wallet-Address",
+                  "value": "0x01234568901234567890",
+                  "enable": true,
+                  "isDelete": false
+                }
+              ]
+            },
+            "commonParameters": {
+              "query": [],
+              "body": [],
+              "header": [],
+              "cookie": []
+            },
+            "requestBody": {
+              "parameters": [],
+              "data": "{\n    \"reason\": \"Position no longer available\"\n}",
+              "type": "application/json",
+              "generateMode": "normal"
+            },
+            "auth": {},
+            "securityScheme": {},
+            "advancedSettings": {
+              "disabledSystemHeaders": {}
+            },
+            "visibility": "INHERITED",
+            "preProcessors": [],
+            "postProcessors": [],
+            "inheritPostProcessors": {},
+            "inheritPreProcessors": {}
+          }
+        ],
+        "mocks": [],
+        "customApiFields": "{}",
+        "advancedSettings": {
+          "disabledSystemHeaders": {
+            "user-agent": true
+          }
+        },
+        "mockScript": {},
+        "codeSamples": [],
+        "commonResponseStatus": {},
+        "responseChildren": []
+      }
+    }
+  ]
+} 

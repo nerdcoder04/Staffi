@@ -8,7 +8,7 @@ STAFFI uses smart contracts to bring trust, traceability, and transparency to HR
 
 | Contract        | Purpose                                   |
 |----------------|--------------------------------------------|
-| `Employee.sol` | Store immutable snapshots of employee data |
+| `Employee.sol` | Store employee data and leave records with optional wallet integration |
 | `Payroll.sol`  | Record salary payout proofs                |
 | `NFTCert.sol`  | Mint NFT certificates for achievements     |
 
@@ -33,33 +33,57 @@ Each milestone can be worked on independently and supported by an AI agent.
 
 ---
 
-### 🔐 Milestone 2: Build `Employee.sol`
+### 🔐 Milestone 2: Build `Employee.sol` (UPDATED)
 
-**Goal:** Smart contract to store employee records and prevent duplicate entries.
+**Goal:** Smart contract to store employee records with database ID as primary key and leave tracking.
 
 **Data Structures:**
 ```solidity
 struct Record {
+  string employeeId;  // Database ID as primary identifier
   string name;
-  address wallet;
+  address wallet;     // Can be address(0) if not connected
   string role;
   string doj;
   string department;
 }
 
-mapping(address => Record) public employees;
+// Map employee IDs to records
+mapping(string => Record) public employeesByID;
+    
+// Secondary index: wallet -> employeeId (only for employees with wallets)
+mapping(address => string) public walletToEmployeeId;
+    
+// Track existing employee IDs
+mapping(string => bool) public isEmployee;
+
+// Leave tracking
+struct LeaveRecord {
+  uint256 leaveDays;  // Using leaveDays instead of days (reserved word)
+  string reason;
+  uint256 timestamp;
+}
+    
+// Store leave records per employee ID
+mapping(string => LeaveRecord[]) public leaveRecords;
 ```
 
 **Events:**
 ```solidity
-event EmployeeAdded(address indexed wallet, string name);
+event EmployeeAdded(string indexed employeeId, string name, address wallet);
+event EmployeeWalletUpdated(string indexed employeeId, address newWallet);
+event LeaveApproved(string indexed employeeId, uint256 leaveDays, string reason);
 ```
 
 **Functions:**
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| `addEmployee(...)` | `(address wallet, string memory name, string memory role, string memory doj, string memory department)` | Add employee record. Reverts if already exists. |
-| `getEmployee(...)` | `(address wallet) view returns (Record memory)` | Get employee data by address |
+| `addEmployee(...)` | `(string memory employeeId, string memory name, address wallet, string memory role, string memory doj, string memory department)` | Add employee record with optional wallet. Reverts if ID already exists. |
+| `updateEmployeeWallet(...)` | `(string memory employeeId, address newWallet)` | Update or add wallet address for existing employee |
+| `getEmployeeById(...)` | `(string memory employeeId) view returns (Record memory)` | Get employee data by ID |
+| `getEmployeeByWallet(...)` | `(address wallet) view returns (Record memory)` | Get employee data by wallet address |
+| `leaveApproved(...)` | `(string memory employeeId, uint256 leaveDays, string memory reason)` | Record leave approval on-chain |
+| `getLeaveRecords(...)` | `(string memory employeeId) view returns (LeaveRecord[] memory)` | Get all leave records for an employee |
 
 ---
 

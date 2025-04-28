@@ -1,0 +1,24 @@
+2025-04-28 11:14:58 [WARN]: Employee contract not initialized: Missing contract address or ABI
+2025-04-28 11:16:05 [WARN]: Employee contract not initialized: Missing contract address or ABI
+2025-04-28 11:16:42 [WARN]: Employee contract not initialized: Missing contract address or ABI
+2025-04-28 11:17:17 [INFO]: Employee contract initialized at address: 0xE17Da280163f24AB248C7c45543A98e008e448A1
+2025-04-28 11:25:45 [INFO]: Employee contract initialized at address: 0xE17Da280163f24AB248C7c45543A98e008e448A1
+2025-04-28 11:34:28 [INFO]: Employee contract initialized at address: 0xE17Da280163f24AB248C7c45543A98e008e448A1
+2025-04-28 11:38:17 [INFO]: Employee contract initialized at address: 0xE17Da280163f24AB248C7c45543A98e008e448A1
+2025-04-28 12:04:03 [INFO]: Employee contract initialized at address: 0xE17Da280163f24AB248C7c45543A98e008e448A1
+2025-04-28 12:13:19 [ERROR]: Error in approving leave: Cannot read properties of undefined (reading 'id')
+2025-04-28 12:13:38 [INFO]: Employee contract initialized at address: 0xE17Da280163f24AB248C7c45543A98e008e448A1
+2025-04-28 12:14:07 [ERROR]: Error in approving leave: Cannot read properties of undefined (reading 'id')
+2025-04-28 12:14:51 [ERROR]: Error in approving leave: Cannot read properties of undefined (reading 'id')
+2025-04-28 12:15:58 [ERROR]: Error in approving leave: Cannot read properties of undefined (reading 'id')
+2025-04-28 12:16:35 [ERROR]: Error in rejecting leave: Cannot read properties of undefined (reading 'id')
+2025-04-28 12:19:58 [INFO]: Employee contract initialized at address: 0xE17Da280163f24AB248C7c45543A98e008e448A1
+2025-04-28 12:24:36 [INFO]: Employee contract initialized at address: 0xE17Da280163f24AB248C7c45543A98e008e448A1
+2025-04-28 12:28:25 [ERROR]: Error applying for leave: date/time field value out of range: "2025-06-31"
+2025-04-28 12:58:21 [INFO]: Employee contract initialized at address: 0xf7014aaaD8CE7ae5054c6391C71D593adC64855c
+2025-04-28 12:59:49 [ERROR]: Blockchain interaction failed, but leave was approved in database:
+2025-04-28 12:59:49 [ERROR]: AggregateError
+2025-04-28 13:07:24 [INFO]: Employee contract initialized at address: 0xf7014aaaD8CE7ae5054c6391C71D593adC64855c
+2025-04-28 13:10:23 [INFO]: Connecting to Ethereum network at: https://sepolia.infura.io/v3/REDACTED
+2025-04-28 13:10:23 [INFO]: Employee contract initialized at address: 0xf7014aaaD8CE7ae5054c6391C71D593adC64855c
+2025-04-28 13:15:14 [ERROR]: Error during leave approval process: execution reverted: "Employee does not exist" (action="estimateGas", data="0x08c379a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000017456d706c6f79656520646f6573206e6f74206578697374000000000000000000", reason="Employee does not exist", transaction={ "data": "0x30f73abf0000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000700000000000000000000000000000000000000000000000000000000000000c0000000000000000000000000000000000000000000000000000000000000002465393139343030392d613561612d343234352d386534642d36663734306231393762663200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000f46616d696c79207661636174696f6e0000000000000000000000000000000000", "from": "0xD5Ef4C18c389Da45967cb21365fe000a708e0Fa5", "to": "0xf7014aaaD8CE7ae5054c6391C71D593adC64855c" }, invocation=null, revert={ "args": [ "Employee does not exist" ], "name": "Error", "signature": "Error(string)" }, code=CALL_EXCEPTION, version=6.13.5)

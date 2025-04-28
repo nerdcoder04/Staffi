@@ -7,6 +7,9 @@ const jwt = require('jsonwebtoken');
 // Secret key for JWT tokens
 const JWT_SECRET = process.env.JWT_SECRET || 'staffi-secret-key-replace-in-production';
 
+// Log the JWT_SECRET length (for debugging)
+console.log('🔐 authRoutes.js: JWT_SECRET length:', JWT_SECRET ? JWT_SECRET.length : 'undefined');
+
 // Helper function to hash passwords
 const hashPassword = (password) => {
     return crypto.createHash('sha256').update(password).digest('hex');
@@ -197,13 +200,16 @@ router.post('/employee/signup', async (req, res) => {
 router.post('/employee/login', async (req, res) => {
     try {
         const { email, password } = req.body;
+        console.log('👤 Employee login attempt for:', email);
 
         if (!email || !password) {
+            console.log('❌ Missing email or password');
             return res.status(400).json({ error: 'Email and password are required' });
         }
 
         // Hash the submitted password
         const hashedPassword = hashPassword(password);
+        console.log('🔑 Password hashed for auth attempt');
 
         // Find employee by email and password
         const { data: employee, error } = await supabase
@@ -213,16 +219,31 @@ router.post('/employee/login', async (req, res) => {
             .eq('password', hashedPassword)
             .single();
 
-        if (error || !employee) {
+        if (error) {
+            console.log('❌ Database error during login:', error);
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
+        if (!employee) {
+            console.log('❌ No employee found with matching credentials');
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        console.log('✅ Employee found in database with ID:', employee.id);
+
+        // Create JWT token payload
+        const tokenPayload = { id: employee.id, email: employee.email, role: 'employee' };
+        console.log('📦 JWT payload:', tokenPayload);
+        console.log('🔑 JWT secret length:', JWT_SECRET.length);
+
         // Create JWT token
         const token = jwt.sign(
-            { id: employee.id, email: employee.email, role: 'employee' },
+            tokenPayload,
             JWT_SECRET,
             { expiresIn: '24h' }
         );
+
+        console.log('🎟️ JWT token created (first 20 chars):', token.substring(0, 20) + '...');
 
         // Get role and department names for the response
         const { role, department } = await getRoleAndDepartmentNames(
@@ -235,13 +256,53 @@ router.post('/employee/login', async (req, res) => {
         employee.role = role;
         employee.department = department;
 
+        console.log('🚀 Employee login successful, sending response');
         res.json({
             message: 'Employee login successful',
             user: employee,
             token
         });
     } catch (error) {
-        console.error('Employee Login Error:', error);
+        console.error('❌ Employee Login Error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Test token verification endpoint (for debugging)
+router.post('/verify-token', (req, res) => {
+    try {
+        const { token } = req.body;
+        console.log('🔍 Testing token verification');
+        
+        if (!token) {
+            return res.status(400).json({ error: 'Token is required' });
+        }
+        
+        console.log('🪪 Token to verify (first 20 chars):', token.substring(0, 20) + '...');
+        console.log('🔐 JWT_SECRET being used (length):', JWT_SECRET.length);
+        
+        try {
+            // First try to decode without verification
+            const decoded = jwt.decode(token);
+            console.log('📦 Token decoded without verification:', decoded);
+            
+            // Now verify
+            const verified = jwt.verify(token, JWT_SECRET);
+            console.log('✅ Token verified successfully!');
+            
+            return res.status(200).json({
+                valid: true,
+                payload: verified
+            });
+        } catch (tokenError) {
+            console.error('❌ Token verification failed:', tokenError);
+            return res.status(401).json({
+                valid: false,
+                error: tokenError.message
+            });
+        }
+    } catch (error) {
+        console.error('❌ Token verification error:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });

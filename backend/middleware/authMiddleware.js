@@ -43,6 +43,8 @@ const authenticateEmployee = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
         console.log('🔑 Attempting employee authentication');
+        console.log('📜 Auth header:', authHeader);
+        console.log('🔒 JWT_SECRET used for verification (length):', JWT_SECRET ? JWT_SECRET.length : 'undefined');
         
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
             console.log('❌ No valid authorization header');
@@ -50,10 +52,21 @@ const authenticateEmployee = async (req, res, next) => {
         }
 
         const token = authHeader.split(' ')[1];
+        console.log('🪪 Received token (first 20 chars):', token ? token.substring(0, 20) + '...' : 'undefined');
         
         try {
+            // Try decoding without verification first to see the payload structure
+            try {
+                const decodedWithoutVerification = jwt.decode(token);
+                console.log('🔍 Token decoded without verification:', decodedWithoutVerification);
+            } catch (decodeError) {
+                console.log('❌ Could not decode token (malformed):', decodeError.message);
+            }
+            
             // Verify the JWT token
             const decoded = jwt.verify(token, JWT_SECRET);
+            console.log('✅ Token verified successfully!');
+            console.log('👤 Decoded JWT payload:', decoded);
             
             // Get employee details from database
             const { data: employee, error } = await supabase
@@ -62,7 +75,12 @@ const authenticateEmployee = async (req, res, next) => {
                 .eq('id', decoded.id)
                 .single();
                 
-            if (error || !employee) {
+            if (error) {
+                console.log('❌ Database error when fetching employee:', error);
+                return res.status(401).json({ error: 'Invalid or expired token' });
+            }
+            
+            if (!employee) {
                 console.log('❌ No employee found with ID:', decoded.id);
                 return res.status(401).json({ error: 'Invalid or expired token' });
             }
@@ -71,7 +89,8 @@ const authenticateEmployee = async (req, res, next) => {
             delete employee.password;
             
             console.log('✅ Employee authentication successful for:', employee.email);
-            req.employee = employee;
+            req.user = employee; // Set as req.user for consistency with other endpoints
+            req.employee = employee; // Keep req.employee for backward compatibility
             next();
         } catch (tokenError) {
             console.error('❌ Token validation error:', tokenError);

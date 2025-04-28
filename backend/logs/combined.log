@@ -1,0 +1,31 @@
+{"level":"info","message":"Connecting to Ethereum network at: https://sepolia.infura.io/v3/REDACTED","service":"staffi-backend","timestamp":"2025-04-28 13:54:36"}
+{"level":"info","message":"Employee contract initialized at address: 0xf7014aaaD8CE7ae5054c6391C71D593adC64855c","service":"staffi-backend","timestamp":"2025-04-28 13:54:36"}
+{"level":"info","message":"Starting employee-blockchain synchronization","service":"staffi-backend","timestamp":"2025-04-28 13:54:36"}
+{"level":"info","message":"Found 1 employees in database","service":"staffi-backend","timestamp":"2025-04-28 13:54:38"}
+{"level":"info","message":"Adding employee e9194009-a5aa-4245-8e4d-6f740b197bf2 (Mr. Uttam Vaghasia) to blockchain...","service":"staffi-backend","timestamp":"2025-04-28 13:54:39"}
+{"level":"info","message":"Employee added to blockchain: e9194009-a5aa-4245-8e4d-6f740b197bf2, tx: 0x8570f6093f252b3d1a07b2fd57d9735b04646999727f0ca212e90058f59a5abb","service":"staffi-backend","timestamp":"2025-04-28 13:54:53"}
+{"level":"info","message":"Connecting to Ethereum network at: https://sepolia.infura.io/v3/REDACTED","service":"staffi-backend","timestamp":"2025-04-28 13:57:35"}
+{"level":"info","message":"Employee contract initialized at address: 0xf7014aaaD8CE7ae5054c6391C71D593adC64855c","service":"staffi-backend","timestamp":"2025-04-28 13:57:35"}
+{"level":"info","message":"Connecting to Ethereum network at: https://sepolia.infura.io/v3/REDACTED","service":"staffi-backend","timestamp":"2025-04-28 13:57:35"}
+{"level":"info","message":"Employee contract initialized at address: 0xf7014aaaD8CE7ae5054c6391C71D593adC64855c","service":"staffi-backend","timestamp":"2025-04-28 13:57:35"}
+{"level":"info","message":"Connecting to Ethereum network at: https://sepolia.infura.io/v3/REDACTED","service":"staffi-backend","timestamp":"2025-04-28 13:59:37"}
+{"level":"info","message":"Employee contract initialized at address: 0xf7014aaaD8CE7ae5054c6391C71D593adC64855c","service":"staffi-backend","timestamp":"2025-04-28 13:59:37"}
+{"level":"info","message":"Connecting to Ethereum network at: https://sepolia.infura.io/v3/REDACTED","service":"staffi-backend","timestamp":"2025-04-28 13:59:37"}
+{"level":"info","message":"Employee contract initialized at address: 0xf7014aaaD8CE7ae5054c6391C71D593adC64855c","service":"staffi-backend","timestamp":"2025-04-28 13:59:37"}
+{"level":"info","message":"Connecting to Ethereum network at: https://sepolia.infura.io/v3/REDACTED","service":"staffi-backend","timestamp":"2025-04-28 13:59:45"}
+{"level":"info","message":"Employee contract initialized at address: 0xf7014aaaD8CE7ae5054c6391C71D593adC64855c","service":"staffi-backend","timestamp":"2025-04-28 13:59:46"}
+{"level":"info","message":"Connecting to Ethereum network at: https://sepolia.infura.io/v3/REDACTED","service":"staffi-backend","timestamp":"2025-04-28 13:59:46"}
+{"level":"info","message":"Employee contract initialized at address: 0xf7014aaaD8CE7ae5054c6391C71D593adC64855c","service":"staffi-backend","timestamp":"2025-04-28 13:59:46"}
+{"level":"info","message":"Connecting to Ethereum network at: https://sepolia.infura.io/v3/REDACTED","service":"staffi-backend","timestamp":"2025-04-28 14:07:16"}
+{"level":"info","message":"Employee contract initialized at address: 0xf7014aaaD8CE7ae5054c6391C71D593adC64855c","service":"staffi-backend","timestamp":"2025-04-28 14:07:16"}
+{"level":"info","message":"Leave approval recorded on blockchain for employee ID: e9194009-a5aa-4245-8e4d-6f740b197bf2, tx: 0x40e9931200c372e35d50c04e7a08bd17feb375511375396a033d705e9c50ccd6","service":"staffi-backend","timestamp":"2025-04-28 14:08:17"}
+{"level":"info","message":"Employee added to blockchain: 7c97fd28-a460-4952-804c-31e096914201, tx: 0xd7332d8fedbfb10140d242e205d797cd823b361fee5e14117a77f1448d1d1b67","service":"staffi-backend","timestamp":"2025-04-28 14:12:29"}
+{"level":"info","message":"Connecting to Ethereum network at: https://sepolia.infura.io/v3/REDACTED","service":"staffi-backend","timestamp":"2025-04-28 14:35:32"}
+{"level":"info","message":"Employee contract initialized at address: 0xf7014aaaD8CE7ae5054c6391C71D593adC64855c","service":"staffi-backend","timestamp":"2025-04-28 14:35:32"}
+{"level":"info","message":"Connecting to Ethereum network at: https://sepolia.infura.io/v3/REDACTED","service":"staffi-backend","timestamp":"2025-04-28 14:41:48"}
+{"level":"info","message":"Employee contract initialized at address: 0xf7014aaaD8CE7ae5054c6391C71D593adC64855c","service":"staffi-backend","timestamp":"2025-04-28 14:41:48"}
+{"level":"info","message":"Connecting to Ethereum network at: https://sepolia.infura.io/v3/REDACTED","service":"staffi-backend","timestamp":"2025-04-28 14:42:27"}
+{"level":"info","message":"Employee contract initialized at address: 0xf7014aaaD8CE7ae5054c6391C71D593adC64855c","service":"staffi-backend","timestamp":"2025-04-28 14:42:27"}
+{"level":"info","message":"Employee added to blockchain: 1c5659ce-5f5a-409a-be4e-a52c49b7f6f1, tx: 0x2be3092625731bf012d5a0bdabb22a7e342786d657b170e50776920f5f455726","service":"staffi-backend","timestamp":"2025-04-28 14:42:39"}
+{"level":"info","message":"Connecting to Ethereum network at: https://sepolia.infura.io/v3/REDACTED","service":"staffi-backend","timestamp":"2025-04-28 16:06:02"}
+{"level":"info","message":"Employee contract initialized at address: 0xf7014aaaD8CE7ae5054c6391C71D593adC64855c","service":"staffi-backend","timestamp":"2025-04-28 16:06:03"}

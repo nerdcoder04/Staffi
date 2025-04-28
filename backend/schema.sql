@@ -60,6 +60,22 @@ CREATE TABLE IF NOT EXISTS employees (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Employee Signup Requests table
+CREATE TABLE IF NOT EXISTS employee_requests (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    role_id INTEGER NOT NULL REFERENCES roles(id),
+    department_id INTEGER NOT NULL REFERENCES departments(id),
+    status TEXT NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    approved_by UUID REFERENCES hr_users(id),
+    approved_at TIMESTAMP WITH TIME ZONE,
+    rejection_reason TEXT
+);
+
 -- HR Users table
 CREATE TABLE IF NOT EXISTS hr_users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -115,6 +131,8 @@ CREATE INDEX IF NOT EXISTS idx_employees_wallet ON employees(wallet);
 CREATE INDEX IF NOT EXISTS idx_employees_role_id ON employees(role_id);
 CREATE INDEX IF NOT EXISTS idx_employees_department_id ON employees(department_id);
 CREATE INDEX IF NOT EXISTS idx_hr_users_wallet ON hr_users(wallet);
+CREATE INDEX IF NOT EXISTS idx_employee_requests_email ON employee_requests(email);
+CREATE INDEX IF NOT EXISTS idx_employee_requests_status ON employee_requests(status);
 CREATE INDEX IF NOT EXISTS idx_leaves_emp_id ON leaves(emp_id);
 CREATE INDEX IF NOT EXISTS idx_payrolls_emp_id ON payrolls(emp_id);
 CREATE INDEX IF NOT EXISTS idx_certificates_emp_id ON certificates(emp_id);
@@ -136,6 +154,11 @@ CREATE TRIGGER update_employees_updated_at
 
 CREATE TRIGGER update_hr_users_updated_at
     BEFORE UPDATE ON hr_users
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_employee_requests_updated_at
+    BEFORE UPDATE ON employee_requests
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 

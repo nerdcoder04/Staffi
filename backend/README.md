@@ -97,6 +97,17 @@ Content-Type: application/json
 }
 ```
 
+### Leave Management Endpoints
+
+See [LEAVE_MANAGEMENT_API.md](./LEAVE_MANAGEMENT_API.md) for detailed documentation on leave management endpoints.
+
+Quick reference:
+- `POST /api/leave/apply` - Submit a leave request (Employee)
+- `GET /api/leave/my-leaves` - Get employee's leave history (Employee)
+- `GET /api/leave/all` - Get all leave requests with filtering (HR)
+- `POST /api/leave/:id/approve` - Approve a pending leave request (HR)
+- `POST /api/leave/:id/reject` - Reject a pending leave request (HR)
+
 ### Protected Routes
 
 All protected routes require a JWT token in the Authorization header:
@@ -119,11 +130,16 @@ Run tests:
 npm test
 ```
 
+To run specific tests:
+```bash
+npm test -- -t "Leave Management API"
+```
+
 ## 📝 Logging
 
 Logs are stored in the `logs` directory:
 - `error.log`: Error logs
-- `combined.log`: All logs
+- `app.log`: All application logs
 
 ## 🔄 Blockchain Integration
 
@@ -142,4 +158,5 @@ The AI module uses OpenAI's GPT-3.5-turbo model to:
 
 ## 📊 Database Schema
 
-See `BACKEND_PLAN.md` for the complete database schema. 
+See `BACKEND_PLAN.md` for the complete database schema.
+See `DATABASE.md` for information about database design and usage. 
