@@ -37,50 +37,50 @@ const FeaturesSection = () => {
       title: "Employee Management",
       description: "Store employee data securely and immutably on the blockchain, ensuring data integrity and privacy.",
       icon: <Users />,
-      isBlockchain: true,
-      isAI: false,
+      // isBlockchain: true,
+      // isAI: false,
     },
     {
       title: "Leave Management",
       description: "Apply and approve leaves through a transparent and automated process using smart contracts.",
       icon: <Calendar />,
-      isBlockchain: true,
-      isAI: false,
+      // isBlockchain: true,
+      // isAI: false,
     },
     {
       title: "Payroll Automation",
       description: "Automate salary payouts securely with blockchain verification to ensure timely and accurate payments.",
       icon: <DollarSign />,
-      isBlockchain: true,
-      isAI: false,
+      // isBlockchain: true,
+      // isAI: false,
     },
     {
       title: "Performance Prediction",
       description: "Leverage AI to predict employee engagement risks and proactively address potential issues.",
       icon: <BarChart />,
-      isBlockchain: false,
-      isAI: true,
+      // isBlockchain: false,
+      // isAI: true,
     },
     {
       title: "Skill Certification NFTs",
       description: "Issue tamper-proof skill certificates as NFTs that employees can own and showcase anywhere.",
       icon: <Award />,
-      isBlockchain: true,
-      isAI: false,
+      // isBlockchain: true,
+      // isAI: false,
     },
     {
       title: "Admin Dashboard",
       description: "Comprehensive oversight with AI-powered insights to make data-driven decisions.",
       icon: <LayoutDashboard />,
-      isBlockchain: false,
-      isAI: true,
+      // isBlockchain: false,
+      // isAI: true,
     },
     {
       title: "Feedback System",
       description: "Optional anonymous feedback storage with end-to-end encryption for honest communication.",
       icon: <MessageSquare />,
-      isBlockchain: false,
-      isAI: false,
+      // isBlockchain: false,
+      // isAI: false,
     },
   ];
 
@@ -115,8 +115,8 @@ const FeaturesSection = () => {
                 title={feature.title}
                 description={feature.description}
                 icon={feature.icon}
-                isBlockchain={feature.isBlockchain}
-                isAI={feature.isAI}
+                // isBlockchain={feature.isBlockchain}
+                // isAI={feature.isAI}
               />
             </div>
           ))}

@@ -40,7 +40,7 @@ const CenteredNavbar = () => {
   
   const navItems = [
     { name: "Dashboard", path: "/dashboard" },
-    { name: "People", path: "/dashboard/people" },
+    { name: "Projects", path: "/dashboard/people" },
     { name: "Employees", path: "/dashboard/employees" },
     { name: "Leaves", path: "/dashboard/leaves" },
     { name: "Payroll", path: "/dashboard/payroll" },

@@ -1,3 +1,5 @@
+>> For Employee we can certainly use this.
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMetaMask } from '@/contexts/MetaMaskContext';
@@ -101,6 +103,15 @@ const ProfilePage = () => {
   const formatAddress = (address: string) => {
     return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
   };
+
+  const mockSkills = [
+    { name: "Leadership", level: 95 },
+    { name: "Project Management", level: 92 },
+    { name: "Strategic Planning", level: 78 },
+    { name: "Team Building", level: 88 },
+    { name: "Communication", level: 90 },
+    { name: "Problem Solving", level: 83 }
+  ];
 
   const mockAchievements = [
     { title: "Employee of the Month", date: "March 2025", icon: <Award className="h-5 w-5 text-amber-500" /> },
@@ -368,6 +379,38 @@ const ProfilePage = () => {
               </div>
               
               {/* Skills Section */}
+              <Card className="border-0 shadow-md">
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-center">
+                    <CardTitle className="text-lg font-medium">Skills & Expertise</CardTitle>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleToggleExpand('skills')}
+                    >
+                      {expanded.skills ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className={expanded.skills ? "space-y-4" : "space-y-4 max-h-64 overflow-hidden"}>
+                    {mockSkills.map((skill, i) => (
+                      <div key={i}>
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-sm font-medium">{skill.name}</span>
+                          <span className="text-sm text-gray-500">{skill.level}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-staffi-purple h-2 rounded-full" 
+                            style={{width: `${skill.level}%`}}
+                          ></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
               
               {/* Achievements */}
               <Card className="border-0 shadow-md">

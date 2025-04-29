@@ -1,4 +1,18 @@
+
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { toast } from "sonner";
+import { 
+  Award, 
+  Plus, 
+  User, 
+  Calendar, 
+  CheckCircle2, 
+  ExternalLink,
+  Search,
+  Filter,
+  SlidersHorizontal
+} from "lucide-react";
 import { 
   Card, 
   CardContent, 
@@ -6,275 +20,434 @@ import {
   CardFooter, 
   CardHeader, 
   CardTitle 
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { 
-  Search, 
-  Filter, 
-  Download, 
-  Plus, 
-  Award, 
-  Calendar, 
-  CheckCircle, 
-  XCircle,
-  FileText,
-  ExternalLink,
-  Clock,
-  FileCheck,
-  Shield,
-  Users,
-  FileCheck2 as CertificateIcon,
-  Lightbulb,
-  Medal,
-  Code,
-  Check as VerifiedIcon
-} from 'lucide-react';
-import StaffiButton from '@/components/ui/staffi-button';
-import { cn } from '@/lib/utils';
+  Select, 
+  SelectContent, 
+  SelectGroup, 
+  SelectItem, 
+  SelectLabel, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle,
+  DialogTrigger
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { CertificateCard } from "@/components/certificates/certificate-card";
+import { useMetaMask } from '@/contexts/MetaMaskContext';
 
-interface Certificate {
-  id: number;
-  name: string;
-  type: string;
-  issueDate: string;
-  expiryDate?: string;
-  issuedBy: string;
-  status: string;
-  assignedTo: string;
-  document?: string;
-  color: string;
-  blockchain: {
-    verified: boolean;
-    hash: string;
-    network: string;
-  };
-  skills: string[];
-  description: string;
-}
-
-const Certificates: React.FC = () => {
-  const [certificates, setCertificates] = useState<Certificate[]>([
+const Certificates = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterBy, setFilterBy] = useState('all');
+  const [isCreating, setIsCreating] = useState(false);
+  const [newCertificate, setNewCertificate] = useState({
+    skillTitle: '',
+    description: '',
+    employee: ''
+  });
+  const { isConnected, connect } = useMetaMask();
+  
+  // Mock certificates data
+  const [certificates, setCertificates] = useState([
     {
-      id: 1,
-      name: 'Certified Scrum Master',
-      type: 'Professional Certification',
-      issueDate: '2023-01-15',
-      expiryDate: '2025-01-15',
-      issuedBy: 'Scrum Alliance',
-      status: 'Active',
-      assignedTo: 'John Doe',
-      color: '#2ecc71',
-      blockchain: {
-        verified: true,
-        hash: 'a1b2c3d4e5f6',
-        network: 'Ethereum',
-      },
-      skills: ['Agile', 'Scrum', 'Project Management'],
-      description: 'Certification for Scrum methodology.',
+      id: "cert-001",
+      skillTitle: "React Advanced Development",
+      description: "Mastery in React hooks, context API, and performance optimization",
+      employee: "Sarah Williams",
+      employeeWallet: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
+      issueDate: "2025-01-15",
+      txHash: "0x2c91d318987dfbf2c7e3adb7c534a22a2f7fed9ba8834128f867a5c9dab535af",
+      issuer: "STAFFI HR"
     },
     {
-      id: 2,
-      name: 'AWS Certified Cloud Practitioner',
-      type: 'Technical Certification',
-      issueDate: '2022-11-20',
-      issuedBy: 'Amazon Web Services',
-      status: 'Active',
-      assignedTo: 'Jane Smith',
-      color: '#3498db',
-      blockchain: {
-        verified: false,
-        hash: 'f1e2d3c4b5a6',
-        network: 'None',
-      },
-      skills: ['Cloud Computing', 'AWS', 'Cloud Services'],
-      description: 'Certification for AWS cloud services.',
+      id: "cert-002",
+      skillTitle: "Project Management Professional",
+      description: "Demonstrated excellence in project planning, execution, and team leadership",
+      employee: "Mark Johnson",
+      employeeWallet: "0x8E5d75D60224eA0c33d0041E75DE12e2a373d6B4",
+      issueDate: "2025-02-20",
+      txHash: "0x7c85d428f693a6a97b74b9bbd5e31ddf573b2b5c516c8076acef2170e7b26b1e",
+      issuer: "STAFFI HR"
     },
     {
-      id: 3,
-      name: 'Project Management Professional',
-      type: 'Professional Certification',
-      issueDate: '2023-05-10',
-      expiryDate: '2026-05-10',
-      issuedBy: 'PMI',
-      status: 'Active',
-      assignedTo: 'Alice Johnson',
-      color: '#e74c3c',
-      blockchain: {
-        verified: true,
-        hash: '9876543210abcdef',
-        network: 'Hyperledger Fabric',
-      },
-      skills: ['Project Management', 'Leadership', 'Planning'],
-      description: 'Certification for project management professionals.',
+      id: "cert-003",
+      skillTitle: "UI/UX Design Principles",
+      description: "Expert knowledge of user interface design, user experience, and accessibility",
+      employee: "Lisa Chen",
+      employeeWallet: "0x3273E381070d397297C4b2C034CA4EB00f0F98B0",
+      issueDate: "2025-03-05",
+      txHash: "0x9a4f1b5f0d3dadba054a3e7091c0d1f4c2c0a06c2c77f7b56138d050e195e157",
+      issuer: "STAFFI HR"
     },
+    {
+      id: "cert-004",
+      skillTitle: "Data Analysis with Python",
+      description: "Proficiency in data processing, visualization, and machine learning with Python",
+      employee: "Alex Thompson",
+      employeeWallet: "0x56D23E9B49D79BB2F52C29B5F9a07dB91f7D7D7D",
+      issueDate: "2025-03-12",
+      txHash: "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+      issuer: "STAFFI HR"
+    }
   ]);
 
-  const [openDialog, setOpenDialog] = useState(false);
-  const [selectedCertificate, setSelectedCertificate] = useState<Certificate | null>(null);
-  const { toast } = useToast();
-
-  const handleCertificateClick = (certificate: Certificate) => {
-    setSelectedCertificate(certificate);
-    setOpenDialog(true);
+  // Mock employee data
+  const employees = [
+    { id: "emp-001", name: "Sarah Williams", wallet: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F" },
+    { id: "emp-002", name: "Mark Johnson", wallet: "0x8E5d75D60224eA0c33d0041E75DE12e2a373d6B4" },
+    { id: "emp-003", name: "Lisa Chen", wallet: "0x3273E381070d397297C4b2C034CA4EB00f0F98B0" },
+    { id: "emp-004", name: "Alex Thompson", wallet: "0x56D23E9B49D79BB2F52C29B5F9a07dB91f7D7D7D" },
+    { id: "emp-005", name: "Michael Brown", wallet: "0x8B3a7DC2E02396c2133F22ee9f8301E40d31552f" }
+  ];
+  
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
   };
-
-  const handleDownload = () => {
-    if (selectedCertificate?.document) {
-      toast({
-        title: "Download Started",
-        description: `Downloading ${selectedCertificate.name} document.`,
+  
+  const handleFilterChange = (value: string) => {
+    setFilterBy(value);
+  };
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setNewCertificate(prev => ({ ...prev, [name]: value }));
+  };
+  
+  const handleEmployeeSelect = (value: string) => {
+    setNewCertificate(prev => ({ ...prev, employee: value }));
+  };
+  
+  const handleMintCertificate = async () => {
+    if (!isConnected) {
+      toast("Wallet connection required", {
+        description: "Please connect your MetaMask wallet to mint certificates.",
       });
-    } else {
-      toast({
-        title: "No Document",
-        description: "No document available for this certificate.",
-        variant: "destructive",
+      return;
+    }
+    
+    if (!newCertificate.skillTitle || !newCertificate.employee) {
+      toast("Required fields missing", {
+        description: "Please fill in all required fields to continue.",
       });
+      return;
+    }
+    
+    setIsCreating(true);
+    
+    try {
+      // Mock blockchain minting process with a timeout
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const selectedEmployee = employees.find(emp => emp.id === newCertificate.employee);
+      if (!selectedEmployee) throw new Error("Employee not found");
+      
+      const newCert = {
+        id: `cert-00${certificates.length + 1}`,
+        skillTitle: newCertificate.skillTitle,
+        description: newCertificate.description,
+        employee: selectedEmployee.name,
+        employeeWallet: selectedEmployee.wallet,
+        issueDate: new Date().toISOString().split('T')[0],
+        txHash: `0x${Math.random().toString(16).substring(2, 66)}`,
+        issuer: "STAFFI HR"
+      };
+      
+      setCertificates(prev => [newCert, ...prev]);
+      
+      toast("Certificate minted successfully!", {
+        description: `The certificate for ${selectedEmployee.name} has been minted on the blockchain.`,
+      });
+      
+      setNewCertificate({
+        skillTitle: '',
+        description: '',
+        employee: ''
+      });
+      
+    } catch (error) {
+      console.error("Error minting certificate:", error);
+      toast("Failed to mint certificate", {
+        description: "There was an error minting the certificate. Please try again.",
+      });
+    } finally {
+      setIsCreating(false);
     }
   };
-
-  const handleBlockchainVerification = () => {
-    if (selectedCertificate?.blockchain.verified) {
-      toast({
-        title: "Blockchain Verified",
-        description: `Certificate ${selectedCertificate.name} is verified on the ${selectedCertificate.blockchain.network} blockchain.`,
-      });
-    } else {
-      toast({
-        title: "Blockchain Not Verified",
-        description: "This certificate has not been verified on the blockchain.",
-        variant: "destructive",
-      });
-    }
-  };
+  
+  // Filter certificates based on search and filter options
+  const filteredCertificates = certificates.filter(cert => {
+    const matchesSearch = 
+      cert.skillTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      cert.employee.toLowerCase().includes(searchQuery.toLowerCase());
+      
+    if (filterBy === 'all') return matchesSearch;
+    
+    const isRecent = new Date(cert.issueDate) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // Last 30 days
+    
+    return matchesSearch && (
+      (filterBy === 'recent' && isRecent) ||
+      (filterBy === 'technical' && 
+        (cert.skillTitle.toLowerCase().includes('development') || 
+         cert.skillTitle.toLowerCase().includes('programming') ||
+         cert.skillTitle.toLowerCase().includes('data') ||
+         cert.skillTitle.toLowerCase().includes('python')))
+    );
+  });
 
   return (
-    <div className="container mx-auto py-10">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-semibold">Certificates</h1>
-        <div className="space-x-2">
-          <Button variant="outline" className="flex items-center">
-            <Filter className="mr-2 h-4 w-4" /> Filter
-          </Button>
-          <Button className="bg-staffi-purple text-white hover:bg-staffi-purple-dark flex items-center">
-            <Plus className="mr-2 h-4 w-4" /> Add Certificate
-          </Button>
+    <div className="animate-fade-in">
+      <div className="flex flex-col gap-8">
+        {/* Header Section */}
+        <div className="flex flex-col gap-2">
+          <h1 className="text-3xl font-bold">Skill Certifications</h1>
+          <p className="text-gray-500">
+            Mint and manage blockchain-verified skill certifications for your employees
+          </p>
         </div>
-      </div>
-
-      <Tabs defaultValue="all" className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="active">Active</TabsTrigger>
-          <TabsTrigger value="expired">Expired</TabsTrigger>
-        </TabsList>
-        <TabsContent value="all" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {certificates.map((certificate) => (
-              <Card key={certificate.id} className="bg-white shadow-md rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer" onClick={() => handleCertificateClick(certificate)}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">{certificate.name}</CardTitle>
-                  <CertificateIcon className="h-4 w-4 text-gray-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-sm text-gray-600">
-                    <p>Type: {certificate.type}</p>
-                    <p>Issued By: {certificate.issuedBy}</p>
-                    <Badge className="mt-2 bg-green-100 text-green-800">{certificate.status}</Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-        <TabsContent value="active">
-          <div>Active Certificates Content</div>
-        </TabsContent>
-        <TabsContent value="expired">
-          <div>Expired Certificates Content</div>
-        </TabsContent>
-      </Tabs>
-
-      {/* Certificate Details Dialog */}
-      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{selectedCertificate?.name}</DialogTitle>
-            <DialogDescription>
-              {selectedCertificate?.description}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="certificate-type" className="text-right">
-                Type
-              </Label>
-              <Input id="certificate-type" value={selectedCertificate?.type || ''} className="col-span-3" readOnly />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="issued-by" className="text-right">
-                Issued By
-              </Label>
-              <Input id="issued-by" value={selectedCertificate?.issuedBy || ''} className="col-span-3" readOnly />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="issue-date" className="text-right">
-                Issue Date
-              </Label>
-              <Input id="issue-date" value={selectedCertificate?.issueDate || ''} className="col-span-3" readOnly />
-            </div>
-            {selectedCertificate?.expiryDate && (
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="expiry-date" className="text-right">
-                  Expiry Date
-                </Label>
-                <Input id="expiry-date" value={selectedCertificate?.expiryDate || ''} className="col-span-3" readOnly />
+        
+        {/* Dashboard Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card className="shadow-md hover:shadow-lg transition-shadow">
+            <CardContent className="p-6 flex justify-between items-center">
+              <div>
+                <p className="text-sm text-gray-500">Total Certificates</p>
+                <p className="text-3xl font-bold">{certificates.length}</p>
               </div>
-            )}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="skills" className="text-right">
-                Skills
-              </Label>
-              <Input id="skills" value={selectedCertificate?.skills.join(', ') || ''} className="col-span-3" readOnly />
-            </div>
-            {selectedCertificate?.blockchain && (
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="blockchain" className="text-right">
-                  Blockchain
-                </Label>
-                <div className="col-span-3 flex items-center space-x-2">
-                  {selectedCertificate.blockchain.verified ? (
-                    <VerifiedIcon className="h-5 w-5 text-green-500" />
-                  ) : (
-                    <XCircle className="h-5 w-5 text-red-500" />
-                  )}
-                  <span>{selectedCertificate.blockchain.network}</span>
+              <div className="p-3 rounded-full bg-staffi-purple/10">
+                <Award className="h-8 w-8 text-staffi-purple" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="shadow-md hover:shadow-lg transition-shadow">
+            <CardContent className="p-6 flex justify-between items-center">
+              <div>
+                <p className="text-sm text-gray-500">Certified Employees</p>
+                <p className="text-3xl font-bold">{new Set(certificates.map(c => c.employee)).size}</p>
+              </div>
+              <div className="p-3 rounded-full bg-staffi-blue/10">
+                <User className="h-8 w-8 text-staffi-blue" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="shadow-md hover:shadow-lg transition-shadow">
+            <CardContent className="p-6 flex justify-between items-center">
+              <div>
+                <p className="text-sm text-gray-500">Issued This Month</p>
+                <p className="text-3xl font-bold">
+                  {certificates.filter(c => {
+                    const today = new Date();
+                    const certDate = new Date(c.issueDate);
+                    return certDate.getMonth() === today.getMonth() && 
+                           certDate.getFullYear() === today.getFullYear();
+                  }).length}
+                </p>
+              </div>
+              <div className="p-3 rounded-full bg-green-100">
+                <Calendar className="h-8 w-8 text-green-600" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        
+        {/* Mint Certificate Card */}
+        <Card className="shadow-lg border-t-4 border-t-staffi-purple">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Award className="h-5 w-5" />
+              Mint New Certificate
+            </CardTitle>
+            <CardDescription>
+              Create a blockchain-verified skill certificate NFT for an employee
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="skillTitle">Skill/Certificate Title*</Label>
+                  <Input 
+                    id="skillTitle" 
+                    name="skillTitle"
+                    placeholder="e.g., Advanced React Development"
+                    value={newCertificate.skillTitle}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description (Optional)</Label>
+                  <Textarea 
+                    id="description" 
+                    name="description"
+                    placeholder="Provide details about this certification"
+                    className="min-h-[100px]"
+                    value={newCertificate.description}
+                    onChange={handleInputChange}
+                  />
                 </div>
               </div>
+              
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="employee">Select Employee*</Label>
+                  <Select value={newCertificate.employee} onValueChange={handleEmployeeSelect}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select employee" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>Employees</SelectLabel>
+                        {employees.map(emp => (
+                          <SelectItem key={emp.id} value={emp.id}>
+                            {emp.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Certificate will be minted to employee's blockchain wallet address
+                  </p>
+                </div>
+                
+                <div className="pt-4">
+                  <Button 
+                    onClick={handleMintCertificate}
+                    className="w-full bg-staffi-purple hover:bg-staffi-purple-dark"
+                    disabled={isCreating}
+                  >
+                    {isCreating ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Minting on Blockchain...
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Mint Certificate NFT
+                      </>
+                    )}
+                  </Button>
+                  
+                  {!isConnected && (
+                    <p className="text-xs text-amber-600 mt-2 flex items-center">
+                      <CheckCircle2 className="h-3 w-3 mr-1" />
+                      Wallet connection required to mint certificates
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        {/* Certificates List */}
+        <div className="space-y-6">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <h2 className="text-2xl font-semibold">Minted Certificates</h2>
+            
+            <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+              <div className="relative w-full md:w-60">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search certificates..." 
+                  className="pl-8"
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                />
+              </div>
+              
+              <Select value={filterBy} onValueChange={handleFilterChange}>
+                <SelectTrigger className="w-full md:w-40">
+                  <SelectValue placeholder="Filter by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Certificates</SelectItem>
+                  <SelectItem value="recent">Recently Issued</SelectItem>
+                  <SelectItem value="technical">Technical Skills</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="gap-2">
+                    <SlidersHorizontal className="h-4 w-4" />
+                    <span className="hidden md:inline">Advanced Filters</span>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Advanced Filters</DialogTitle>
+                    <DialogDescription>
+                      Filter certificates by multiple criteria
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <div className="grid gap-4 py-4">
+                    <div className="space-y-2">
+                      <Label>Date Range</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input type="date" placeholder="From" />
+                        <Input type="date" placeholder="To" />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>Certificate Categories</Label>
+                      <div className="flex flex-wrap gap-2">
+                        <Button variant="outline" size="sm" className="rounded-full">Technical</Button>
+                        <Button variant="outline" size="sm" className="rounded-full">Soft Skills</Button>
+                        <Button variant="outline" size="sm" className="rounded-full">Management</Button>
+                        <Button variant="outline" size="sm" className="rounded-full">Leadership</Button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <DialogFooter>
+                    <Button variant="outline">Reset</Button>
+                    <Button>Apply Filters</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredCertificates.length > 0 ? (
+              filteredCertificates.map((cert, index) => (
+                <CertificateCard key={cert.id} certificate={cert} delay={index * 0.1} />
+              ))
+            ) : (
+              <div className="col-span-full flex flex-col items-center justify-center py-16 text-center">
+                <div className="p-4 rounded-full bg-gray-100 mb-4">
+                  <Award className="h-8 w-8 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-medium mb-1">No certificates found</h3>
+                <p className="text-gray-500 max-w-md">
+                  {searchQuery || filterBy !== 'all' ? 
+                    "Try adjusting your search or filter criteria" : 
+                    "Start by minting a new certificate for your employees"}
+                </p>
+              </div>
             )}
           </div>
-          <DialogFooter>
-            <Button type="button" variant="secondary" onClick={() => setOpenDialog(false)}>
-              Close
-            </Button>
-            <Button type="button" onClick={handleDownload}>
-              Download
-            </Button>
-            {selectedCertificate?.blockchain && (
-              <Button type="button" variant="outline" onClick={handleBlockchainVerification}>
-                Verify on Blockchain
-              </Button>
-            )}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </div>
+      </div>
     </div>
   );
 };

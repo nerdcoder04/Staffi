@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -138,6 +137,37 @@ const teamMembers = [
   }
 ];
 
+const allTeamMembers = [
+  ...teamMembers,
+  { 
+    name: 'Sarah Chen', 
+    email: 'sarahc@staffi.com',
+    role: 'Frontend Developer', 
+    employment: '6 months', 
+    productivity: 'High',
+    status: 'Active',
+    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
+  },
+  { 
+    name: 'Robert Wilson', 
+    email: 'robertw@staffi.com',
+    role: 'Backend Developer', 
+    employment: '1 year 2 months', 
+    productivity: 'Medium',
+    status: 'Active',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
+  },
+  { 
+    name: 'Emily Davis', 
+    email: 'emilyd@staffi.com',
+    role: 'UX Designer', 
+    employment: '9 months', 
+    productivity: 'High',
+    status: 'Active',
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
+  }
+];
+
 interface CustomTooltipProps {
   active?: boolean;
   payload?: Array<any>;
@@ -150,6 +180,9 @@ const DashboardOverview = () => {
   const [dialogContent, setDialogContent] = useState({ title: '', content: '' });
   const { toast } = useToast();
   const [date, setDate] = useState<Date>(new Date());
+  const [displayedMembers, setDisplayedMembers] = useState(teamMembers);
+  const [showAllMembers, setShowAllMembers] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const currentHour = new Date().getHours();
   const greeting = currentHour < 12 ? 'Good Morning' : currentHour < 18 ? 'Good Afternoon' : 'Good Evening';
@@ -191,6 +224,21 @@ const DashboardOverview = () => {
     return null;
   };
 
+  const handleSearch = useCallback((query: string) => {
+    setSearchQuery(query);
+    const filteredMembers = allTeamMembers.filter(member => 
+      member.name.toLowerCase().includes(query.toLowerCase()) ||
+      member.role.toLowerCase().includes(query.toLowerCase()) ||
+      member.email.toLowerCase().includes(query.toLowerCase())
+    );
+    setDisplayedMembers(filteredMembers);
+  }, []);
+
+  const handleViewAll = () => {
+    setShowAllMembers(true);
+    setDisplayedMembers(allTeamMembers);
+  };
+
   return (
     <div className="w-full animate-fade-in">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
@@ -213,15 +261,16 @@ const DashboardOverview = () => {
       {/* Key Metrics Section */}
       <KeyMetricsSection />
 
+      {/* Main Cards Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
-        {/* Schedule Card */}
+        {/* Schedule Card - Fixed height */}
         <div className="lg:col-span-4">
           <ScheduleCard className="h-[540px]" />
         </div>
 
-        <div className="lg:col-span-5 grid grid-cols-1 gap-6">
-          {/* Pending Leave Requests Card */}
-          <Card className="overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300">
+        <div className="lg:col-span-5">
+          {/* Leave Requests Card - Fixed height */}
+          <Card className="h-[540px] overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg font-semibold">Pending Leave Requests</CardTitle>
@@ -303,91 +352,11 @@ const DashboardOverview = () => {
               </div>
             </CardContent>
           </Card>
-
-          {/* Upcoming Payroll */}
-          <Card className="overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300">
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg font-semibold">Upcoming Payroll</CardTitle>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-8 w-8 p-0 rounded-full"
-                  onClick={() => {
-                    toast({
-                      title: "Process Payroll",
-                      description: "Navigate to payroll processing",
-                    });
-                  }}
-                >
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </div>
-              <CardDescription>Next run: April 30, 2025</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between mb-4">
-                <div className="relative w-24 h-24 flex items-center justify-center">
-                  <svg className="w-full h-full" viewBox="0 0 120 120">
-                    <circle 
-                      cx="60" 
-                      cy="60" 
-                      r="54" 
-                      fill="none" 
-                      stroke="#E5E7EB" 
-                      strokeWidth="12"
-                    />
-                    <circle 
-                      cx="60" 
-                      cy="60" 
-                      r="54" 
-                      fill="none" 
-                      stroke="#8B5CF6" 
-                      strokeWidth="12"
-                      strokeDasharray="339.3"
-                      strokeDashoffset="84.8" /* 75% complete */
-                      transform="rotate(-90 60 60)"
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-lg font-semibold">5d</span>
-                  </div>
-                </div>
-                
-                <div className="space-y-3 flex-1 ml-4">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Total Amount</span>
-                    <span className="font-semibold">$258,942.00</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Tax Withholdings</span>
-                    <span className="font-semibold">$62,145.08</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Net Payroll</span>
-                    <span className="font-semibold">$196,796.92</span>
-                  </div>
-                </div>
-              </div>
-
-              <Button 
-                className="w-full mt-4 bg-staffi-purple hover:bg-staffi-purple-dark text-white"
-                onClick={() => {
-                  toast({
-                    title: "Payroll Preview",
-                    description: "Previewing payroll calculations",
-                  });
-                }}
-              >
-                Preview Payroll Run
-              </Button>
-            </CardContent>
-          </Card>
         </div>
 
-        <div className="lg:col-span-3 grid grid-cols-1 gap-6">
-          {/* Project Status */}
-          <Card className="overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300">
+        <div className="lg:col-span-3">
+          {/* Project Status Card - Fixed height */}
+          <Card className="h-[540px] overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300">
             <CardHeader className="pb-2">
               <CardTitle className="text-lg font-semibold">Project Status</CardTitle>
               <CardDescription>Active projects overview</CardDescription>
@@ -439,13 +408,95 @@ const DashboardOverview = () => {
               </div>
             </CardContent>
           </Card>
-
-          {/* Attendance Report Card */}
-          <AttendanceReportCard />
         </div>
       </div>
 
-      {/* Hiring Score with Line Chart */}
+      {/* Horizontal Cards Row - Upcoming Payroll and Attendance Report */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        {/* Upcoming Payroll - Horizontal Card */}
+        <Card className="h-[240px] overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300">
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg font-semibold">Upcoming Payroll</CardTitle>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 w-8 p-0 rounded-full"
+                onClick={() => {
+                  toast({
+                    title: "Process Payroll",
+                    description: "Navigate to payroll processing",
+                  });
+                }}
+              >
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </div>
+            <CardDescription>Next run: April 30, 2025</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div className="relative w-20 h-20 flex items-center justify-center">
+                <svg className="w-full h-full" viewBox="0 0 120 120">
+                  <circle 
+                    cx="60" 
+                    cy="60" 
+                    r="54" 
+                    fill="none" 
+                    stroke="#E5E7EB" 
+                    strokeWidth="12"
+                  />
+                  <circle 
+                    cx="60" 
+                    cy="60" 
+                    r="54" 
+                    fill="none" 
+                    stroke="#8B5CF6" 
+                    strokeWidth="12"
+                    strokeDasharray="339.3"
+                    strokeDashoffset="84.8" /* 75% complete */
+                    transform="rotate(-90 60 60)"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-lg font-semibold">5d</span>
+                </div>
+              </div>
+              
+              <div className="space-y-2 flex-1 ml-4">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Total Amount</span>
+                  <span className="font-semibold">$258,942.00</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Tax Withholdings</span>
+                  <span className="font-semibold">$62,145.08</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Net Payroll</span>
+                  <span className="font-semibold">$196,796.92</span>
+                </div>
+                <Button 
+                  className="w-full mt-2 bg-staffi-purple hover:bg-staffi-purple-dark text-white"
+                  onClick={() => {
+                    toast({
+                      title: "Payroll Preview",
+                      description: "Previewing payroll calculations",
+                    });
+                  }}
+                >
+                  Preview Payroll Run
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        {/* Attendance Report Card - Horizontal format */}
+        <AttendanceReportCard className="h-[240px]" />
+      </div>2
+
+      {/* Hiring Statistics with Area Chart */}
       <Card className="border-0 shadow-md mb-6">
         <CardHeader>
           <div className="flex justify-between items-center">
@@ -462,7 +513,7 @@ const DashboardOverview = () => {
         <CardContent>
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart
+              <AreaChart
                 data={hiringScoreData}
                 margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
               >
@@ -479,30 +530,32 @@ const DashboardOverview = () => {
                   tickLine={false}
                   tickFormatter={(value) => value.toString()}
                 />
-                <RechartsTooltip 
-                  content={<CustomTooltip />}
-                  cursor={{ stroke: '#8B5CF6', strokeWidth: 1, strokeDasharray: '5 5' }}
-                />
-                <Legend verticalAlign="top" align="right" />
-                <Line 
-                  type="monotone" 
-                  dataKey="candidates" 
-                  stroke="#8B5CF6" 
+                <RechartsTooltip content={<CustomTooltip />} />
+                <Area
+                  type="monotone"
+                  dataKey="candidates"
+                  stroke="#8B5CF6"
+                  fill="url(#colorCandidates)"
                   strokeWidth={2}
-                  dot={{ r: 4, strokeWidth: 0, fill: '#8B5CF6' }}
-                  activeDot={{ r: 6, stroke: '#8B5CF6', strokeWidth: 2 }}
-                  name="Candidates"
                 />
-                <Line 
-                  type="monotone" 
-                  dataKey="hired" 
-                  stroke="#F59E0B" 
+                <Area
+                  type="monotone"
+                  dataKey="hired"
+                  stroke="#F59E0B"
+                  fill="url(#colorHired)"
                   strokeWidth={2}
-                  dot={{ r: 4, strokeWidth: 0, fill: '#F59E0B' }}
-                  activeDot={{ r: 6, stroke: '#F59E0B', strokeWidth: 2 }}
-                  name="Hired"
                 />
-              </LineChart>
+                <defs>
+                  <linearGradient id="colorCandidates" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.2}/>
+                    <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="colorHired" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.2}/>
+                    <stop offset="95%" stopColor="#F59E0B" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+              </AreaChart>
             </ResponsiveContainer>
           </div>
         </CardContent>
@@ -521,6 +574,8 @@ const DashboardOverview = () => {
               type="search"
               placeholder="Search members..."
               className="pl-9 pr-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-1 focus:ring-staffi-purple"
+              value={searchQuery}
+              onChange={(e) => handleSearch(e.target.value)}
             />
           </div>
         </CardHeader>
@@ -538,7 +593,7 @@ const DashboardOverview = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {teamMembers.map((member, index) => (
+              {displayedMembers.map((member, index) => (
                 <React.Fragment key={index}>
                   <TableRow 
                     className="cursor-pointer hover:bg-gray-50" 
@@ -639,21 +694,19 @@ const DashboardOverview = () => {
               ))}
             </TableBody>
           </Table>
+
+          {!showAllMembers && (
+            <div className="flex justify-center mt-6">
+              <Button 
+                variant="outline"
+                className="text-staffi-purple border-staffi-purple hover:bg-staffi-purple-light/20"
+                onClick={handleViewAll}
+              >
+                View All Team Members
+              </Button>
+            </div>
+          )}
         </CardContent>
-        <CardFooter className="flex justify-center border-t pt-4">
-          <Button 
-            variant="outline"
-            className="text-staffi-purple border-staffi-purple hover:bg-staffi-purple-light/20"
-            onClick={() => {
-              toast({
-                title: "Team Management",
-                description: "Navigating to full team management page",
-              });
-            }}
-          >
-            View All Team Members
-          </Button>
-        </CardFooter>
       </Card>
 
       {/* Dialog for various actions */}

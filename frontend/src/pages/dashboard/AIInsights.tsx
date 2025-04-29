@@ -1,404 +1,441 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { 
   Card, 
   CardContent, 
   CardDescription, 
-  CardFooter, 
   CardHeader, 
-  CardTitle 
+  CardTitle, 
+  CardFooter
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Textarea } from '@/components/ui/textarea';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { cn } from '@/lib/utils';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { useToast } from "@/components/ui/use-toast";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/components/ui/use-toast";
+import { cn } from "@/lib/utils";
+import {
+  AlertTriangle,
   Lightbulb,
   TrendingUp,
+  Check,
+  BarChart,
   LineChart,
   Users,
-  Calendar,
-  FileText,
-  MessageSquare,
-  ChevronRight,
-  RefreshCw,
-  Check,
-  MoreHorizontal,
-  ZoomIn,
-  Download
+  Activity,
+  User
 } from 'lucide-react';
 import StaffiButton from '@/components/ui/staffi-button';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@/components/ui/chart';
+import { 
+  LineChart as RechartsLineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  BarChart as RechartsBarChart,
+  Bar,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
+  Legend
+} from 'recharts';
+import { motion } from 'framer-motion';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import EmployeeComparisonTool from '@/components/insights/employee-comparison-tool';
+import AnomalyDetector from '@/components/insights/anomaly-detector';
 
 const AIInsights = () => {
-  const [query, setQuery] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [activeInsight, setActiveInsight] = useState(null);
-  const [showDialog, setShowDialog] = useState(false);
-  const [activeTab, setActiveTab] = useState('productivity');
+  const [selectedEmployee, setSelectedEmployee] = useState("");
+  const [behaviorLogs, setBehaviorLogs] = useState("");
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [predictionResult, setPredictionResult] = useState<null | {
+    riskLevel: 'low' | 'medium' | 'high';
+    suggestions: string[];
+  }>(null);
+  const [engagementTrends, setEngagementTrends] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState("individual");
+  
   const { toast } = useToast();
-  
-  // Sample data for charts
-  const productivityData = [
-    { name: 'Mon', value: 78 },
-    { name: 'Tue', value: 82 },
-    { name: 'Wed', value: 85 },
-    { name: 'Thu', value: 90 },
-    { name: 'Fri', value: 75 },
-    { name: 'Sat', value: 50 },
-    { name: 'Sun', value: 40 },
-  ];
-  
-  const satisfactionData = [
-    { name: "Very Satisfied", value: 60 },
-    { name: "Satisfied", value: 25 },
-    { name: "Neutral", value: 10 },
-    { name: "Unsatisfied", value: 5 }
-  ];
-  
-  const COLORS = ['#8B5CF6', '#6E59A5', '#E5DEFF', '#D3E4FD'];
-  
-  const insights = [
-    {
-      id: 1,
-      title: "Employee Productivity Trends",
-      description: "Team productivity has increased by 15% in the last quarter. Top performers include Sarah Williams and Michael Chen.",
-      category: "Productivity",
-      icon: TrendingUp,
-      date: "Updated 2 days ago",
-      color: "bg-purple-50 text-staffi-purple",
-      detailedChart: "productivity",
-      detailedDescription: "Team productivity is measured based on task completion rates, quality of work, and adherence to deadlines. The 15% increase represents a significant improvement over the previous quarter, particularly in the Engineering and Design departments. This positive trend correlates with the recent implementation of flexible work arrangements and improved project management workflows."
-    },
-    {
-      id: 2,
-      title: "Burnout Risk Analysis",
-      description: "3 employees show potential signs of burnout based on work hours and decreased engagement metrics.",
-      category: "Wellbeing",
-      icon: Users,
-      date: "Updated 1 day ago",
-      color: "bg-amber-50 text-amber-600",
-      detailedChart: "burnout",
-      detailedDescription: "Early burnout indicators include consistently working over 50 hours weekly, decreased participation in team activities, and subtle changes in communication patterns. The AI has identified these patterns in 3 team members, primarily in the Development and Marketing departments. Recommended interventions include scheduling 1:1 check-ins, evaluating workload distribution, and encouraging the use of available mental health resources."
-    },
-    {
-      id: 3,
-      title: "Leave Pattern Prediction",
-      description: "Expect 20% increase in leave requests during the upcoming holiday season. Plan staffing accordingly.",
-      category: "Leave",
-      icon: Calendar,
-      date: "Updated 3 days ago",
-      color: "bg-blue-50 text-blue-600",
-      detailedChart: "leave",
-      detailedDescription: "Historical leave data shows consistent patterns of increased time-off requests during November-December. The projected 20% increase is based on current staffing levels, historical trends, and announced holiday plans. Departments most affected will likely be Customer Support and Operations. Recommended actions include early scheduling discussions, temporary role cross-training, and potential contingent staffing for critical positions."
-    },
-    {
-      id: 4,
-      title: "Payroll Optimization",
-      description: "Payroll efficiency can be improved by 7% through automation of overtime calculations.",
-      category: "Payroll",
-      icon: FileText,
-      date: "Updated 5 days ago",
-      color: "bg-green-50 text-green-600",
-      detailedChart: "payroll",
-      detailedDescription: "Manual overtime calculations are currently costing approximately 15 hours of HR time monthly with a 3.5% error rate. Implementing automated calculations would reduce processing time by 85% while virtually eliminating calculation errors. The 7% efficiency improvement factors in reduced labor costs, error correction time, and compliance risk reduction. Implementation would require approximately 3 weeks with minimal disruption to existing workflows."
-    },
-  ];
-  
-  const inquiries = [
-    "Who are our top performing employees this month?",
-    "What is our average employee satisfaction score?",
-    "Predict leave patterns for the next quarter",
-    "Suggest improvements for our onboarding process",
+
+  // Mock employee data
+  const employees = [
+    { id: "1", name: "Sarah Johnson" },
+    { id: "2", name: "Michael Chen" },
+    { id: "3", name: "Emily Rodriguez" },
+    { id: "4", name: "David Kim" },
+    { id: "5", name: "Lisa Thompson" }
   ];
 
-  const handleAskAI = useCallback(() => {
-    if (!query.trim()) {
+  // Generate engagement trend data when employee is selected
+  useEffect(() => {
+    if (selectedEmployee) {
+      // Mock data - in a real app, this would come from an API
+      const mockData = generateMockEngagementData(selectedEmployee);
+      setEngagementTrends(mockData);
+    } else {
+      setEngagementTrends([]);
+    }
+  }, [selectedEmployee]);
+
+  // Generate mock engagement data
+  const generateMockEngagementData = (employeeId: string) => {
+    const today = new Date();
+    const data = [];
+    
+    // Generate 12 weeks of data
+    for (let i = 11; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i * 7);
+      
+      // Different patterns based on employee ID
+      let score;
+      if (employeeId === "1") {
+        // Declining pattern
+        score = 85 - i * 3 + Math.random() * 10;
+      } else if (employeeId === "2") {
+        // Improving pattern
+        score = 50 + i * 3 + Math.random() * 10;
+      } else if (employeeId === "3") {
+        // Stable pattern
+        score = 75 + Math.random() * 10;
+      } else {
+        // Random pattern
+        score = 50 + Math.random() * 40;
+      }
+      
+      // Ensure score is within bounds
+      score = Math.max(0, Math.min(100, score));
+      
+      data.push({
+        week: `Week ${12-i}`,
+        date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        score: Math.round(score),
+        emoji: getEmojiForScore(Math.round(score))
+      });
+    }
+    
+    return data;
+  };
+
+  // Get emoji based on score
+  const getEmojiForScore = (score: number) => {
+    if (score >= 70) return "🙂";
+    if (score >= 40) return "😐";
+    return "😟";
+  };
+
+  const handlePrediction = useCallback(() => {
+    if (!selectedEmployee || !behaviorLogs.trim()) {
       toast({
-        title: "Error",
-        description: "Please enter a query first",
+        title: "Missing Information",
+        description: "Please select an employee and provide behavior logs.",
         variant: "destructive",
       });
       return;
     }
-    
-    setIsProcessing(true);
-    
-    // Simulate AI processing
+
+    setIsAnalyzing(true);
+
+    // Simulate AI analysis
     setTimeout(() => {
-      setIsProcessing(false);
+      setIsAnalyzing(false);
+      
+      // Different results based on selected employee
+      let riskLevel: 'low' | 'medium' | 'high';
+      let suggestions: string[];
+      
+      if (selectedEmployee === "1") {
+        riskLevel = 'high';
+        suggestions = [
+          "Schedule an urgent 1-on-1 check-in to discuss concerns and provide support",
+          "Consider temporary workload reduction or redistribution",
+          "Offer access to wellness resources and mental health support",
+          "Review team dynamics and communication patterns"
+        ];
+      } else if (selectedEmployee === "2") {
+        riskLevel = 'medium';
+        suggestions = [
+          "Schedule weekly 1-on-1 check-ins to improve communication and address concerns",
+          "Consider providing additional learning and development opportunities",
+          "Review workload distribution and team dynamics",
+          "Encourage participation in team-building activities"
+        ];
+      } else {
+        riskLevel = 'low';
+        suggestions = [
+          "Maintain regular check-ins to ensure continued engagement",
+          "Provide opportunities for growth and skill development",
+          "Acknowledge and celebrate achievements to maintain motivation",
+          "Consider assigning mentorship responsibilities to leverage expertise"
+        ];
+      }
+      
+      setPredictionResult({
+        riskLevel,
+        suggestions
+      });
+      
       toast({
-        title: "AI Response",
-        description: "Analysis complete. Results are now available in your insights dashboard.",
+        title: "Analysis Complete",
+        description: "Engagement prediction has been generated successfully.",
       });
     }, 2000);
-  }, [query, toast]);
+  }, [selectedEmployee, behaviorLogs, toast]);
 
-  const handleInsightClick = (insight) => {
-    setActiveInsight(insight);
-    setShowDialog(true);
+  const getRiskLevelColor = (level: 'low' | 'medium' | 'high') => {
+    const colors = {
+      low: 'bg-green-50 text-green-700',
+      medium: 'bg-amber-50 text-amber-700',
+      high: 'bg-red-50 text-red-700'
+    };
+    return colors[level];
   };
 
-  const handleRefreshChart = (chartType) => {
-    setActiveTab(chartType);
-    toast({
-      title: "Refreshing Data",
-      description: "Chart data has been refreshed with the latest information.",
-    });
-  };
-
-  const handleGenerateReport = () => {
-    toast({
-      title: "Generating Report",
-      description: "Your detailed report is being prepared and will be available shortly.",
-    });
+  const getRiskLevelEmoji = (level: 'low' | 'medium' | 'high') => {
+    const emojis = {
+      low: '🙂',
+      medium: '😐',
+      high: '😟'
+    };
+    return emojis[level];
   };
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">AI Insights</h1>
-          <p className="text-gray-500 mt-1">Intelligence-driven HR analytics and recommendations</p>
+          <h1 className="text-3xl font-bold text-gray-900">Employee Engagement Analysis</h1>
+          <p className="text-gray-500 mt-1">Use AI to predict employee engagement and get personalized recommendations</p>
         </div>
       </div>
 
-      {/* AI Assistant */}
-      <Card className="border-0 shadow-md overflow-hidden transition-all hover:shadow-lg duration-200">
-        <div className="bg-gradient-to-r from-staffi-purple to-staffi-purple-dark p-6 text-white">
-          <div className="flex items-center gap-3">
-            <div className="bg-white/20 p-2 rounded-full">
-              <Lightbulb className="h-5 w-5" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold">Staffi AI Assistant</h3>
-              <p className="text-sm text-white/80">Ask anything about your HR data and get instant insights</p>
-            </div>
-          </div>
-          
-          <div className="mt-6">
-            <div className="flex flex-col space-y-4">
-              <Textarea 
-                placeholder="Ask a question about your employees, payroll, leave patterns, or productivity..."
-                className="bg-white/10 border-white/20 min-h-[80px] text-white placeholder:text-white/60 focus-visible:ring-white/30"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
-              <div className="flex space-x-3">
-                <StaffiButton 
-                  className="bg-white text-staffi-purple hover:bg-white/90"
-                  onClick={handleAskAI}
-                  disabled={isProcessing}
-                >
-                  {isProcessing ? (
-                    <>
-                      <RefreshCw className="mr-1 h-4 w-4 animate-spin" /> 
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <MessageSquare className="mr-1 h-4 w-4" /> 
-                      Ask AI
-                    </>
-                  )}
-                </StaffiButton>
-                <Button 
-                  variant="outline" 
-                  className="border-white/30 text-white hover:bg-white/10 hover:text-white"
-                  onClick={() => {
-                    toast({
-                      title: "Sample Queries",
-                      description: "Sample queries have been loaded below.",
-                    });
-                  }}
-                >
-                  View Sample Queries
-                </Button>
-              </div>
-            </div>
-            
-            {!query && (
-              <div className="mt-6 space-y-3">
-                <p className="text-sm font-medium">Popular inquiries:</p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {inquiries.map((inquiry, index) => (
-                    <div 
-                      key={index}
-                      className="bg-white/10 border border-white/20 rounded-lg p-3 hover:bg-white/20 cursor-pointer transition-colors"
-                      onClick={() => setQuery(inquiry)}
-                    >
-                      <p className="text-sm">{inquiry}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </Card>
-
-      {/* Key Insights */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {insights.map((insight) => (
-          <Card key={insight.id} className="border-0 shadow-md hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleInsightClick(insight)}>
-            <div className="p-6">
-              <div className="flex items-start justify-between">
-                <div className={cn("p-2 rounded-full", insight.color)}>
-                  <insight.icon className="h-5 w-5" />
-                </div>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </div>
-              <h3 className="font-medium text-gray-900 mt-3">{insight.title}</h3>
-              <p className="text-gray-500 text-sm mt-1">{insight.description}</p>
-              <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
-                <span className="text-xs text-gray-500">
-                  {insight.date}
-                </span>
-                <Button variant="ghost" size="sm" className="h-7 text-staffi-purple hover:text-staffi-purple hover:bg-staffi-purple/5">
-                  Details <ChevronRight className="ml-1 h-3 w-3" />
-                </Button>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
-
-      {/* Analytics Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Productivity Trends */}
-        <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Team Productivity Trends</CardTitle>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-8 w-8"
-                onClick={() => handleRefreshChart('productivity')}
-              >
-                <RefreshCw className="h-4 w-4" />
-              </Button>
-            </div>
-            <CardDescription>Average productivity scores over the last week</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={productivityData}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="name" tick={{fontSize: 12}} />
-                  <YAxis domain={[0, 100]} tick={{fontSize: 12}} />
-                  <Tooltip
-                    formatter={(value) => [`${value}%`, 'Productivity']}
-                    contentStyle={{ 
-                      borderRadius: '8px', 
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)', 
-                      border: 'none' 
-                    }}
-                  />
-                  <Bar dataKey="value" fill="#8B5CF6" barSize={30} radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="flex justify-end mt-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="text-xs"
-                onClick={() => {
-                  toast({
-                    title: "Report Downloaded",
-                    description: "Productivity report has been downloaded.",
-                  });
-                }}
-              >
-                <Download className="h-3.5 w-3.5 mr-1" /> Export Data
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+      <Tabs defaultValue="individual" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid grid-cols-3 w-full max-w-2xl">
+          <TabsTrigger value="individual" className="flex items-center gap-2">
+            <User className="h-4 w-4" /> Individual Analysis
+          </TabsTrigger>
+          <TabsTrigger value="compare" className="flex items-center gap-2">
+            <Users className="h-4 w-4" /> Compare Employees
+          </TabsTrigger>
+          <TabsTrigger value="anomalies" className="flex items-center gap-2">
+            <Activity className="h-4 w-4" /> Anomalies
+          </TabsTrigger>
+        </TabsList>
         
-        {/* Employee Satisfaction */}
-        <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Employee Satisfaction</CardTitle>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-8 w-8"
-                onClick={() => handleRefreshChart('satisfaction')}
-              >
-                <RefreshCw className="h-4 w-4" />
-              </Button>
-            </div>
-            <CardDescription>Based on latest employee survey data</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={satisfactionData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    outerRadius={100}
-                    fill="#8884d8"
-                    dataKey="value"
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                  >
-                    {satisfactionData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+        {/* Individual Analysis Tab */}
+        <TabsContent value="individual" className="space-y-6">
+          <Card className="border-0 shadow-md">
+            <CardHeader>
+              <CardTitle>Engagement Prediction</CardTitle>
+              <CardDescription>
+                Select an employee and provide recent behavior observations for AI analysis
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Select Employee</label>
+                <Select 
+                  value={selectedEmployee} 
+                  onValueChange={setSelectedEmployee}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Choose an employee" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {employees.map((employee) => (
+                      <SelectItem key={employee.id} value={employee.id}>
+                        {employee.name}
+                      </SelectItem>
                     ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(value) => [`${value}%`, 'Employees']}
-                    contentStyle={{ 
-                      borderRadius: '8px', 
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)', 
-                      border: 'none' 
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="flex justify-center mt-2">
-              <div className="flex items-center space-x-4">
-                {satisfactionData.map((entry, index) => (
-                  <div key={index} className="flex items-center">
-                    <div className="h-3 w-3 rounded-full mr-1" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
-                    <span className="text-xs">{entry.name}</span>
-                  </div>
-                ))}
+                  </SelectContent>
+                </Select>
               </div>
-            </div>
-            <div className="flex justify-end mt-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="text-xs"
-                onClick={() => {
-                  toast({
-                    title: "Report Downloaded",
-                    description: "Satisfaction report has been downloaded.",
-                  });
-                }}
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Behavior Logs</label>
+                <Textarea 
+                  placeholder="Enter recent behavior observations, performance notes, or relevant incidents..."
+                  value={behaviorLogs}
+                  onChange={(e) => setBehaviorLogs(e.target.value)}
+                  className="min-h-[150px]"
+                />
+              </div>
+
+              <StaffiButton 
+                onClick={handlePrediction}
+                disabled={isAnalyzing}
+                className="w-full sm:w-auto"
               >
-                <Download className="h-3.5 w-3.5 mr-1" /> Export Data
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                {isAnalyzing ? (
+                  <>
+                    <span className="animate-pulse">Analyzing...</span>
+                    <div className="ml-2 animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                  </>
+                ) : (
+                  <>Run AI Analysis</>
+                )}
+              </StaffiButton>
+            </CardContent>
+          </Card>
+
+          {predictionResult && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Card className="border-0 shadow-md">
+                <CardHeader>
+                  <div className="flex items-center space-x-2">
+                    <AlertTriangle className="h-5 w-5 text-amber-500" />
+                    <CardTitle>Prediction Results</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className={`p-4 rounded-lg ${getRiskLevelColor(predictionResult.riskLevel)}`}>
+                    <div className="font-medium flex items-center justify-between">
+                      <div>
+                        Risk Level: {predictionResult.riskLevel.charAt(0).toUpperCase() + predictionResult.riskLevel.slice(1)}
+                      </div>
+                      <div className="text-2xl">
+                        {getRiskLevelEmoji(predictionResult.riskLevel)}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* AI-generated summary styled like a chatbot message */}
+                  <div className="bg-staffi-purple/10 rounded-lg p-4 border border-staffi-purple/20">
+                    <div className="flex items-start gap-3">
+                      <div className="bg-staffi-purple text-white rounded-full p-2 h-8 w-8 flex items-center justify-center">
+                        AI
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-gray-800">
+                          {predictionResult.riskLevel === 'high' && (
+                            "This employee is showing significant signs of disengagement that require immediate attention. Recent activity patterns suggest potential burnout risks that should be addressed proactively."
+                          )}
+                          {predictionResult.riskLevel === 'medium' && (
+                            "There are some warning signs of decreasing engagement for this employee. While not critical yet, addressing these concerns now could prevent further disengagement."
+                          )}
+                          {predictionResult.riskLevel === 'low' && (
+                            "This employee appears to be well-engaged and productive. Their activity patterns indicate healthy work involvement and satisfaction with current roles and responsibilities."
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Engagement Trend Chart */}
+                  {engagementTrends.length > 0 && (
+                    <div className="space-y-3">
+                      <h3 className="font-medium flex items-center gap-2">
+                        <LineChart className="h-5 w-5 text-staffi-purple" />
+                        Engagement Trends
+                      </h3>
+                      <div className="h-72 w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <RechartsLineChart data={engagementTrends} margin={{ top: 5, right: 20, bottom: 25, left: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                            <XAxis 
+                              dataKey="date" 
+                              tick={{ fontSize: 12 }} 
+                              tickMargin={10}
+                            />
+                            <YAxis 
+                              domain={[0, 100]} 
+                              tick={{ fontSize: 12 }} 
+                              tickMargin={10}
+                            />
+                            <Tooltip 
+                              content={({ active, payload }) => {
+                                if (active && payload && payload.length) {
+                                  const data = payload[0].payload;
+                                  return (
+                                    <div className="bg-white p-3 border shadow-md rounded-md">
+                                      <p className="font-medium">{data.date}</p>
+                                      <p className="text-staffi-purple flex items-center gap-2">
+                                        Engagement Score: {data.score} <span>{data.emoji}</span>
+                                      </p>
+                                    </div>
+                                  );
+                                }
+                                return null;
+                              }}
+                            />
+                            <Line 
+                              type="monotone" 
+                              dataKey="score" 
+                              stroke="#8b5cf6" 
+                              strokeWidth={3} 
+                              dot={{ fill: '#8b5cf6', stroke: '#8b5cf6', strokeWidth: 2, r: 4 }}
+                              activeDot={{ fill: '#8b5cf6', stroke: '#8b5cf6', strokeWidth: 3, r: 6 }}
+                            />
+                          </RechartsLineChart>
+                        </ResponsiveContainer>
+                      </div>
+                      
+                      {/* Emoji Key */}
+                      <div className="flex items-center gap-6 justify-end text-sm">
+                        <div className="flex items-center gap-1">
+                          <span className="text-lg">🙂</span>
+                          <span className="text-gray-600">High Engagement</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="text-lg">😐</span>
+                          <span className="text-gray-600">Moderate Engagement</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="text-lg">😟</span>
+                          <span className="text-gray-600">Low Engagement</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-4">
+                    <h3 className="font-medium flex items-center gap-2">
+                      <Lightbulb className="h-5 w-5 text-staffi-purple" />
+                      Recommendations
+                    </h3>
+                    <ul className="space-y-3">
+                      {predictionResult.suggestions.map((suggestion, index) => (
+                        <li key={index} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                          <TrendingUp className="h-5 w-5 text-staffi-purple mt-0.5" />
+                          <span>{suggestion}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </TabsContent>
+
+        {/* Compare Employees Tab */}
+        <TabsContent value="compare">
+          <EmployeeComparisonTool />
+        </TabsContent>
+
+        {/* Anomalies Tab */}
+        <TabsContent value="anomalies">
+          <AnomalyDetector />
+        </TabsContent>
+      </Tabs>
 
       {/* AI Recommendations */}
       <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
@@ -444,155 +481,17 @@ const AIInsights = () => {
         <CardFooter className="flex justify-end">
           <StaffiButton 
             className="w-full sm:w-auto"
-            onClick={handleGenerateReport}
+            onClick={() => {
+              toast({
+                title: "Report Generation Started",
+                description: "Your detailed report is being generated and will be available soon.",
+              });
+            }}
           >
             Generate Detailed Report
           </StaffiButton>
         </CardFooter>
       </Card>
-
-      {/* Insight Detail Dialog */}
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="sm:max-w-4xl">
-          {activeInsight && (
-            <>
-              <DialogHeader>
-                <div className="flex items-center space-x-2">
-                  <div className={cn("p-1.5 rounded-full", activeInsight.color)}>
-                    <activeInsight.icon className="h-4 w-4" />
-                  </div>
-                  <DialogTitle>{activeInsight.title}</DialogTitle>
-                </div>
-                <DialogDescription>
-                  {activeInsight.category} · {activeInsight.date}
-                </DialogDescription>
-              </DialogHeader>
-              
-              <div className="space-y-6">
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-gray-700">
-                    {activeInsight.detailedDescription}
-                  </p>
-                </div>
-                
-                <div className="h-[300px] w-full">
-                  <Tabs defaultValue={activeInsight.detailedChart}>
-                    <TabsList className="mb-4">
-                      <TabsTrigger value="productivity">Productivity</TabsTrigger>
-                      <TabsTrigger value="trends">Trends</TabsTrigger>
-                      <TabsTrigger value="comparison">Comparison</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="productivity" className="h-[300px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={productivityData}>
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                          <XAxis dataKey="name" />
-                          <YAxis />
-                          <Tooltip />
-                          <Bar dataKey="value" fill="#8B5CF6" radius={[4, 4, 0, 0]} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </TabsContent>
-                    <TabsContent value="trends" className="h-[300px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={satisfactionData}
-                            cx="50%"
-                            cy="50%"
-                            labelLine={false}
-                            outerRadius={100}
-                            fill="#8884d8"
-                            dataKey="value"
-                            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                          >
-                            {satisfactionData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                          </Pie>
-                          <Tooltip />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </TabsContent>
-                    <TabsContent value="comparison" className="h-[300px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={productivityData}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" />
-                          <YAxis />
-                          <Tooltip />
-                          <Legend />
-                          <Bar dataKey="value" name="Current" fill="#8B5CF6" />
-                          <Bar dataKey="value" name="Previous" fill="#E5DEFF" />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </TabsContent>
-                  </Tabs>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Card className="border border-gray-100">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-base">Key Metrics</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-500">Productivity Rate</span>
-                          <span className="font-medium">85%</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-500">Improvement</span>
-                          <span className="font-medium">+15%</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-500">Affected Employees</span>
-                          <span className="font-medium">42</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card className="border border-gray-100">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-base">Recommendations</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ul className="list-disc list-inside text-sm space-y-1 text-gray-700">
-                        <li>Schedule team review of findings</li>
-                        <li>Implement suggested policy changes</li>
-                        <li>Follow up with key stakeholders</li>
-                        <li>Review progress in 30 days</li>
-                      </ul>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-              
-              <DialogFooter>
-                <Button 
-                  variant="outline"
-                  onClick={() => setShowDialog(false)}
-                >
-                  Close
-                </Button>
-                <Button 
-                  variant="default"
-                  onClick={() => {
-                    setShowDialog(false);
-                    toast({
-                      title: "Report Generated",
-                      description: "Detailed report has been generated and sent to your email.",
-                    });
-                  }}
-                >
-                  Download Report
-                </Button>
-              </DialogFooter>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
