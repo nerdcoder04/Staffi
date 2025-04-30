@@ -3,52 +3,32 @@
  */
 
 const express = require('express');
+const { authenticateEmployee, authenticateHR } = require('../middleware/authMiddleware');
+const employeeController = require('../controllers/employeeController');
+
 const router = express.Router();
-const { authenticateHR, authenticateEmployee } = require('../middleware/authMiddleware');
-const { 
-    getAllEmployees, 
-    getEmployeeById,
-    connectWallet,
-    disconnectWallet,
-    getAllRoles,
-    getAllDepartments,
-    requestEmployeeSignup,
-    createEmployee,
-    updateEmployee,
-    deleteEmployee
-} = require('../controllers/employeeController');
 
-// Get all available roles
-router.get('/roles', getAllRoles);
+// Public routes
+router.post('/request', employeeController.requestEmployeeSignup);
 
-// Get all available departments
-router.get('/departments', getAllDepartments);
+// Employee routes
+router.get('/me', authenticateEmployee, employeeController.getEmployeeProfile);
+router.put('/me', authenticateEmployee, employeeController.updateEmployeeProfile);
+router.put('/me/wallet', authenticateEmployee, employeeController.updateEmployeeWallet);
 
-// Request new employee signup (public route)
-router.post('/request', requestEmployeeSignup);
+// HR-only routes
+router.get('/requests', authenticateHR, employeeController.getAllEmployeeRequests);
+router.post('/requests/:id/approve', authenticateHR, employeeController.approveEmployeeRequest);
+router.post('/requests/:id/reject', authenticateHR, employeeController.rejectEmployeeRequest);
 
-// Get all employees (HR only)
-router.get('/all', authenticateHR, getAllEmployees);
+router.get('/all', authenticateHR, employeeController.getAllEmployees);
+router.get('/:id', authenticateHR, employeeController.getEmployeeById);
+router.put('/:id', authenticateHR, employeeController.updateEmployee);
+router.delete('/:id', authenticateHR, employeeController.deleteEmployee);
 
-// Get employee by ID (HR only)
-router.get('/:id', authenticateHR, getEmployeeById);
-
-// Connect wallet to employee account (Employee only)
-router.post('/wallet/connect', authenticateEmployee, connectWallet);
-
-// Disconnect wallet from employee account (Employee only)
-router.post('/wallet/disconnect', authenticateEmployee, disconnectWallet);
-
-// GET /api/employees - Get all employees
-router.get('/', getAllEmployees);
-
-// POST /api/employees - Create new employee
-router.post('/', createEmployee);
-
-// PUT /api/employees/:id - Update employee
-router.put('/:id', updateEmployee);
-
-// DELETE /api/employees/:id - Delete employee
-router.delete('/:id', deleteEmployee);
+// Blockchain-related routes (HR only)
+router.post('/:id/blockchain', authenticateHR, employeeController.addEmployeeToBlockchain);
+router.get('/:id/blockchain', authenticateHR, employeeController.checkEmployeeBlockchainStatus);
+router.put('/:id/blockchain/wallet', authenticateHR, employeeController.updateEmployeeBlockchainWallet);
 
 module.exports = router; 

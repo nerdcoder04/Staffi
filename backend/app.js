@@ -18,6 +18,7 @@ const hrRoutes = require('./routes/hrRoutes');
 const employeeRoutes = require('./routes/employeeRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const leaveRoutes = require('./routes/leaveRoutes');
+const employeeStatusRoutes = require('./routes/employeeStatusRoutes');
 const { authenticateHR, authenticateEmployee } = require('./middleware/authMiddleware');
 
 // Create Express app
@@ -61,6 +62,7 @@ app.use('/api/hr', hrRoutes);
 app.use('/api/employee', employeeRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/leave', leaveRoutes);
+app.use('/api/employee-status', employeeStatusRoutes);
 
 // Protected Routes for Testing
 app.get('/api/protected/hr-route', authenticateHR, (req, res) => {

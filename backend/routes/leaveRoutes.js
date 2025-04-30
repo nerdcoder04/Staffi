@@ -12,5 +12,6 @@ router.get('/my-leaves', authenticateEmployee, leaveController.getMyLeaves);
 router.get('/all', authenticateHR, leaveController.getAllLeaves);
 router.post('/:id/approve', authenticateHR, leaveController.approveLeave);
 router.post('/:id/reject', authenticateHR, leaveController.rejectLeave);
+router.post('/:id/return', authenticateHR, leaveController.returnFromLeave);
 
 module.exports = router; 

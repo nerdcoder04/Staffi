@@ -5,6 +5,9 @@
  * after the database migration has been applied
  */
 
+const supabase = require('../utils/supabaseClient');
+const blockchainService = require('../utils/blockchainService');
+
 // Update an employee's status
 const updateEmployeeStatus = async (req, res) => {
     try {
@@ -41,7 +44,7 @@ const updateEmployeeStatus = async (req, res) => {
             });
         }
 
-        // Record status change in history table (create this table if you need an audit trail)
+        // Record status change in history table
         try {
             await supabase
                 .from('employee_status_history')
@@ -56,7 +59,7 @@ const updateEmployeeStatus = async (req, res) => {
             console.warn('Failed to record status history, continuing with update:', historyError);
         }
 
-        // Update employee status
+        // Update employee status in database
         const { data: updatedEmployee, error: updateError } = await supabase
             .from('employees')
             .update({
@@ -73,22 +76,31 @@ const updateEmployeeStatus = async (req, res) => {
 
         console.log(`✅ Employee ${employee.name} status updated from ${employee.status} to ${status.toUpperCase()}`);
 
-        // Record on blockchain if integrated
-        if (status.toUpperCase() === 'TERMINATED' || status.toUpperCase() === 'SUSPENDED') {
-            try {
-                // If blockchain integration is available for status changes
-                if (blockchainService && typeof blockchainService.updateEmployeeStatus === 'function') {
-                    const blockchainResult = await blockchainService.updateEmployeeStatus(
-                        id, 
-                        status.toUpperCase(),
-                        reason || 'Status update by HR'
-                    );
-                    
-                    console.log(`✅ Employee status change recorded on blockchain: ${blockchainResult.txHash || 'N/A'}`);
+        // Record ALL status changes on blockchain automatically
+        let blockchainTxHash = null;
+        try {
+            // Check if employee exists on blockchain
+            const blockchainStatus = await blockchainService.checkEmployeeExistsOnBlockchain(id);
+            
+            if (blockchainStatus.exists) {
+                // Update status on blockchain
+                const blockchainResult = await blockchainService.updateEmployeeStatus(
+                    id, 
+                    status.toUpperCase(),
+                    reason || 'Status update by HR'
+                );
+                
+                if (blockchainResult.success) {
+                    blockchainTxHash = blockchainResult.txHash;
+                    console.log(`✅ Employee status change recorded on blockchain: ${blockchainTxHash}`);
+                } else {
+                    console.error('❌ Blockchain recording failed:', blockchainResult.reason);
                 }
-            } catch (blockchainError) {
-                console.error('❌ Blockchain recording failed, but status updated in database:', blockchainError);
+            } else {
+                console.warn(`⚠️ Employee ${id} does not exist on blockchain yet. Status change recorded in database only.`);
             }
+        } catch (blockchainError) {
+            console.error('❌ Blockchain recording failed, but status updated in database:', blockchainError);
         }
         
         // Return the updated employee data
@@ -96,61 +108,11 @@ const updateEmployeeStatus = async (req, res) => {
         
         res.json({
             message: `Employee status successfully updated to ${status.toUpperCase()}`,
-            employee: updatedEmployee
+            employee: updatedEmployee,
+            blockchain_transaction: blockchainTxHash
         });
     } catch (error) {
         console.error('❌ Error in updateEmployeeStatus:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-};
-
-// Request a leave of absence (sets status to ON_LEAVE)
-const requestLeaveOfAbsence = async (req, res) => {
-    try {
-        const { startDate, endDate, reason } = req.body;
-        const employeeId = req.employee.id;
-
-        if (!startDate || !endDate || !reason) {
-            return res.status(400).json({ error: 'Start date, end date, and reason are required' });
-        }
-
-        // Calculate total days
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        const diffTime = Math.abs(end - start);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 to include the end day
-
-        if (diffDays <= 0 || start > end) {
-            return res.status(400).json({ error: 'Invalid date range' });
-        }
-
-        // Create leave request in the leaves table
-        const { data: leaveRequest, error: leaveError } = await supabase
-            .from('leaves')
-            .insert({
-                emp_id: employeeId,
-                reason: reason,
-                days: diffDays,
-                start_date: startDate,
-                end_date: endDate,
-                status: 'PENDING'
-            })
-            .select()
-            .single();
-
-        if (leaveError) {
-            console.error('❌ Error creating leave request:', leaveError);
-            return res.status(500).json({ error: 'Failed to create leave request' });
-        }
-
-        console.log(`✅ Leave request created for employee ID ${employeeId} for ${diffDays} days`);
-
-        res.status(201).json({
-            message: 'Leave request submitted successfully',
-            leave_request: leaveRequest
-        });
-    } catch (error) {
-        console.error('❌ Error in requestLeaveOfAbsence:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };
@@ -171,6 +133,5 @@ const getValidStatusTransitions = (currentStatus) => {
 // Export functions to be integrated
 module.exports = {
     updateEmployeeStatus,
-    requestLeaveOfAbsence,
     getValidStatusTransitions
 }; 

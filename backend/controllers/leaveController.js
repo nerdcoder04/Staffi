@@ -134,7 +134,7 @@ exports.approveLeave = async (req, res) => {
       .from('leaves')
       .select(`
         *,
-        employees(wallet)
+        employees(id, name, email, status, wallet)
       `)
       .eq('id', id)
       .single();
@@ -205,10 +205,84 @@ exports.approveLeave = async (req, res) => {
       }
     }
 
+    // Change employee status to ON_LEAVE
+    let statusUpdateResult = null;
+    let statusUpdateError = null;
+    const previousStatus = leave.employees.status || 'ACTIVE';
+    
+    try {
+      // Update employee status in database
+      const { data: updatedEmployee, error: statusError } = await supabase
+        .from('employees')
+        .update({
+          status: 'ON_LEAVE'
+        })
+        .eq('id', leave.emp_id)
+        .select()
+        .single();
+      
+      if (statusError) {
+        logger.error('Error updating employee status to ON_LEAVE:', statusError);
+        statusUpdateError = 'Failed to update employee status in database';
+      } else {
+        // Record status change in history
+        const { error: historyError } = await supabase
+          .from('employee_status_history')
+          .insert({
+            employee_id: leave.emp_id,
+            previous_status: previousStatus,
+            new_status: 'ON_LEAVE',
+            changed_by: hrId,
+            reason: `Leave approved: ${leave.reason}`
+          });
+        
+        if (historyError) {
+          logger.error('Error recording status history:', historyError);
+        }
+        
+        // Update status on blockchain
+        const statusBlockchainResult = await blockchainService.updateEmployeeStatus(
+          leave.emp_id,
+          'ON_LEAVE',
+          `Leave approved: ${leave.reason}`
+        );
+        
+        if (statusBlockchainResult.success) {
+          // Update the status history record with the transaction hash
+          await supabase
+            .from('employee_status_history')
+            .update({ blockchain_tx: statusBlockchainResult.txHash })
+            .eq('employee_id', leave.emp_id)
+            .is('blockchain_tx', null)
+            .order('created_at', { ascending: false })
+            .limit(1);
+          
+          statusUpdateResult = {
+            success: true,
+            transaction: statusBlockchainResult.txHash
+          };
+        } else {
+          logger.error('Error updating employee status on blockchain:', statusBlockchainResult.reason);
+          statusUpdateResult = {
+            success: false,
+            reason: statusBlockchainResult.reason
+          };
+        }
+      }
+    } catch (statusUpdateErr) {
+      logger.error('Error in status update process:', statusUpdateErr);
+      statusUpdateError = 'Unexpected error during status update';
+    }
+
     return res.status(200).json({
       message: 'Leave request approved successfully and recorded on blockchain',
       leave: data,
-      blockchain_tx: blockchainResult.txHash
+      blockchain_tx: blockchainResult.txHash,
+      status_update: {
+        success: statusUpdateResult ? statusUpdateResult.success : false,
+        error: statusUpdateError,
+        transaction: statusUpdateResult ? statusUpdateResult.transaction : null
+      }
     });
   } catch (error) {
     logger.error('Error in approving leave:', error);
@@ -271,6 +345,140 @@ exports.rejectLeave = async (req, res) => {
     });
   } catch (error) {
     logger.error('Error in rejecting leave:', error);
+    return res.status(500).json({ error: 'Server error' });
+  }
+};
+
+/**
+ * Mark an employee as returned from leave (HR only)
+ * @route POST /api/leave/:id/return
+ */
+exports.returnFromLeave = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { comments } = req.body;
+    
+    // The HR user data is already available from authMiddleware
+    const hrId = req.hrUser.id;
+
+    // Get leave details to verify it exists and was approved
+    const { data: leave, error: leaveError } = await supabase
+      .from('leaves')
+      .select(`
+        *,
+        employees(id, name, email, status, wallet)
+      `)
+      .eq('id', id)
+      .single();
+
+    if (leaveError || !leave) {
+      return res.status(404).json({ error: 'Leave request not found' });
+    }
+
+    if (leave.status !== 'APPROVED') {
+      return res.status(400).json({ error: 'Only approved leaves can be marked as returned' });
+    }
+    
+    if (leave.employees.status !== 'ON_LEAVE') {
+      return res.status(400).json({ error: 'Employee is not currently on leave' });
+    }
+
+    // Update the leave status in the database
+    const { data, error } = await supabase
+      .from('leaves')
+      .update({
+        status: 'COMPLETED',
+        return_date: new Date(),
+        return_comments: comments || null
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      logger.error('Error updating leave to completed:', error);
+      return res.status(500).json({ error: 'Failed to mark leave as completed' });
+    }
+
+    // Change employee status back to ACTIVE
+    let statusUpdateResult = null;
+    let statusUpdateError = null;
+    
+    try {
+      // Update employee status in database
+      const { data: updatedEmployee, error: statusError } = await supabase
+        .from('employees')
+        .update({
+          status: 'ACTIVE'
+        })
+        .eq('id', leave.emp_id)
+        .select()
+        .single();
+      
+      if (statusError) {
+        logger.error('Error updating employee status to ACTIVE:', statusError);
+        statusUpdateError = 'Failed to update employee status in database';
+      } else {
+        // Record status change in history
+        const { error: historyError } = await supabase
+          .from('employee_status_history')
+          .insert({
+            employee_id: leave.emp_id,
+            previous_status: 'ON_LEAVE',
+            new_status: 'ACTIVE',
+            changed_by: hrId,
+            reason: `Returned from leave: ${comments || 'Leave period completed'}`
+          });
+        
+        if (historyError) {
+          logger.error('Error recording status history:', historyError);
+        }
+        
+        // Update status on blockchain
+        const statusBlockchainResult = await blockchainService.updateEmployeeStatus(
+          leave.emp_id,
+          'ACTIVE',
+          `Returned from leave: ${comments || 'Leave period completed'}`
+        );
+        
+        if (statusBlockchainResult.success) {
+          // Update the status history record with the transaction hash
+          await supabase
+            .from('employee_status_history')
+            .update({ blockchain_tx: statusBlockchainResult.txHash })
+            .eq('employee_id', leave.emp_id)
+            .is('blockchain_tx', null)
+            .order('created_at', { ascending: false })
+            .limit(1);
+          
+          statusUpdateResult = {
+            success: true,
+            transaction: statusBlockchainResult.txHash
+          };
+        } else {
+          logger.error('Error updating employee status on blockchain:', statusBlockchainResult.reason);
+          statusUpdateResult = {
+            success: false,
+            reason: statusBlockchainResult.reason
+          };
+        }
+      }
+    } catch (statusUpdateErr) {
+      logger.error('Error in status update process:', statusUpdateErr);
+      statusUpdateError = 'Unexpected error during status update';
+    }
+
+    return res.status(200).json({
+      message: 'Employee marked as returned from leave successfully',
+      leave: data,
+      status_update: {
+        success: statusUpdateResult ? statusUpdateResult.success : false,
+        error: statusUpdateError,
+        transaction: statusUpdateResult ? statusUpdateResult.transaction : null
+      }
+    });
+  } catch (error) {
+    logger.error('Error in marking return from leave:', error);
     return res.status(500).json({ error: 'Server error' });
   }
 }; 

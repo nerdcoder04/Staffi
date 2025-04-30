@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const logger = require('./logger');
+const logger = require('../utils/logger');
 const ethers = require('ethers');
 
 // Initialize blockchain components
@@ -189,44 +189,6 @@ const checkEmployeeExistsOnBlockchain = async (employeeId) => {
   }
 };
 
-// Update employee status on blockchain
-const updateEmployeeStatus = async (employeeId, status, reason) => {
-    if (process.env.NODE_ENV === 'test' || !employeeContract) {
-      logger.warn('Skipping blockchain operation in test mode or contract not initialized');
-      return { success: false, reason: 'Test mode or contract not initialized' };
-    }
-  
-    try {
-      // Check connection first
-      if (!await isBlockchainAvailable()) {
-        return { success: false, reason: 'Blockchain connection not available' };
-      }
-      
-      // Call the smart contract function
-      const tx = await employeeContract.updateEmployeeStatus(
-        employeeId,
-        status,
-        reason || ''
-      );
-      
-      // Wait for transaction to be mined
-      const receipt = await tx.wait();
-      
-      logger.info(`Employee status update recorded on blockchain for employee ID: ${employeeId}, status: ${status}, tx: ${tx.hash}`);
-      
-      return {
-        success: true,
-        txHash: tx.hash
-      };
-    } catch (error) {
-      logger.error(`Error recording employee status on blockchain: ${error.message}`);
-      return {
-        success: false,
-        reason: error.message
-      };
-    }
-};
-
 // Initialize blockchain on module load
 const initialized = initBlockchain();
 
@@ -234,6 +196,5 @@ module.exports = {
   isBlockchainAvailable,
   addEmployeeToBlockchain,
   recordLeaveApproval,
-  checkEmployeeExistsOnBlockchain,
-  updateEmployeeStatus
+  checkEmployeeExistsOnBlockchain
 }; 

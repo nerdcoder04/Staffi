@@ -22,9 +22,20 @@ contract Employee is Ownable {
     // Track existing employee IDs
     mapping(string => bool) public isEmployee;
 
+    // Status tracking
+    struct StatusRecord {
+        string status;
+        string reason;
+        uint256 timestamp;
+    }
+    
+    // Store status records per employee ID
+    mapping(string => StatusRecord[]) public statusRecords;
+
     // Events
     event EmployeeAdded(string indexed employeeId, string name, address wallet);
     event EmployeeWalletUpdated(string indexed employeeId, address newWallet);
+    event EmployeeStatusUpdated(string indexed employeeId, string status, string reason);
     
     // Leave tracking
     struct LeaveRecord {
@@ -86,6 +97,29 @@ contract Employee is Ownable {
         // Update the wallet
         employeesByID[employeeId].wallet = newWallet;
         emit EmployeeWalletUpdated(employeeId, newWallet);
+    }
+
+    // Update employee status on-chain
+    function updateEmployeeStatus(string memory employeeId, string memory status, string memory reason) external onlyOwner {
+        require(isEmployee[employeeId], "Employee does not exist");
+        
+        statusRecords[employeeId].push(StatusRecord({
+            status: status,
+            reason: reason,
+            timestamp: block.timestamp
+        }));
+        
+        emit EmployeeStatusUpdated(employeeId, status, reason);
+    }
+    
+    // Get all status records for an employee
+    function getStatusRecords(string memory employeeId) 
+        external 
+        view 
+        returns (StatusRecord[] memory) 
+    {
+        require(isEmployee[employeeId], "Employee does not exist");
+        return statusRecords[employeeId];
     }
 
     function getEmployeeById(string memory employeeId) 

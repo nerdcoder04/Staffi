@@ -1,162 +1,126 @@
 # STAFFI Backend
 
-## 🚀 Setup Instructions
+## Overview
 
-1. Install dependencies:
-```bash
-npm install
+The STAFFI backend provides a RESTful API for the STAFFI HR Management System. It integrates with blockchain technology to provide immutable records of critical HR data.
+
+## Current Implementation Status
+
+| Module | Status | Notes |
+|--------|--------|-------|
+| **Authentication** | ✅ Implemented | HR login with wallet, Employee login with credentials |
+| **Employee Management** | ✅ Implemented | CRUD operations, blockchain integration |
+| **Leave Management** | ✅ Implemented | Apply, approve/reject with blockchain verification |
+| **Payroll Management** | 🚧 Planned | Smart contract integration pending |
+| **Certificate (NFT)** | 🚧 Planned | ERC721 integration pending |
+| **AI Analytics** | 🚧 Planned | OpenAI integration pending |
+
+## Recent Refactoring
+
+The codebase has been refactored to improve organization and maintainability:
+
+1. **Service Layer**: Added dedicated service classes for:
+   - `blockchainService.js` - Smart contract interactions
+   - `supabaseService.js` - Database operations
+
+2. **Route Organization**: Consolidated and organized route files
+   - Removed duplicate endpoints
+   - Organized routes by functionality and permission level
+
+3. **Documentation**: Added comprehensive API documentation
+   - See `API_DOCUMENTATION.md` for full details
+   - Individual module documentation files (e.g., `LEAVE_MANAGEMENT_API.md`)
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js v16+
+- Supabase account
+- Ethereum wallet with private key
+- Access to Ethereum node (Infura, Alchemy, etc.)
+
+### Installation
+
+1. Clone the repository
+2. Install dependencies:
+   ```
+   cd backend
+   npm install
+   ```
+3. Create `.env` file (see `.env.example` for required variables)
+4. Initialize database:
+   ```
+   npm run db:init
+   ```
+5. Start the server:
+   ```
+   npm start
+   ```
+
+### Environment Variables
+
+See `.env.example` for a complete list of required variables:
+
+- `PORT` - Server port (default: 3001)
+- `NODE_ENV` - Environment (development, test, production)
+- `SUPABASE_URL` - Supabase project URL
+- `SUPABASE_ANON_KEY` - Supabase anonymous key
+- `JWT_SECRET` - Secret for JWT tokens
+- `JWT_EXPIRES_IN` - JWT expiration (default: "24h")
+- `ETHEREUM_RPC_URL` - Ethereum RPC endpoint
+- `PRIVATE_KEY` - Private key for contract interactions
+- `EMPLOYEE_CONTRACT_ADDRESS` - Deployed Employee contract address
+- `INFURA_API_KEY` - (Optional) Infura API key
+
+## API Documentation
+
+See `API_DOCUMENTATION.md` for a comprehensive list of all endpoints.
+
+## Smart Contract Integration
+
+The backend integrates with the following smart contracts:
+
+1. **Employee.sol** (Implemented)
+   - Store employee records with database ID as primary key
+   - Track leave history on-chain
+
+2. **Payroll.sol** (Planned)
+   - Record proof of salary payments
+
+3. **NFTCert.sol** (Planned)
+   - Mint certificate NFTs for employee achievements
+
+## Testing
+
+Run the test suite with:
+
 ```
-
-2. Create a `.env` file in the root directory with the following variables:
-```env
-# Server Configuration
-PORT=3000
-NODE_ENV=development
-
-# JWT Configuration
-JWT_SECRET=your-secret-key
-
-# Supabase Configuration
-SUPABASE_URL=your-supabase-url
-SUPABASE_ANON_KEY=your-supabase-anon-key
-
-# Blockchain Configuration
-RPC_URL=your-polygon-rpc-url
-WALLET_PRIVATE_KEY=your-wallet-private-key
-
-# OpenAI Configuration
-OPENAI_API_KEY=your-openai-api-key
-```
-
-3. Get the required API keys:
-
-### Supabase Setup
-1. Go to https://supabase.com
-2. Create a new project
-3. Get the `SUPABASE_URL` and `SUPABASE_ANON_KEY` from Project Settings > API
-
-### OpenAI Setup
-1. Go to https://platform.openai.com
-2. Create an account and get your API key
-3. Store it as `OPENAI_API_KEY`
-
-### Blockchain Setup
-1. For development: Use Polygon Mumbai testnet
-2. Get RPC URL from https://polygon-rpc.com
-3. Create a wallet using MetaMask or similar
-4. Get some test MATIC from Mumbai faucet
-5. Export private key (carefully!) and store as `WALLET_PRIVATE_KEY`
-
-## 🏃‍♂️ Running the Server
-
-Development mode:
-```bash
-npm run dev
-```
-
-Production mode:
-```bash
-npm start
-```
-
-## 📚 API Documentation
-
-### Authentication Endpoints
-
-#### HR Login
-```http
-POST /api/auth/hr-login
-Content-Type: application/json
-
-{
-  "walletAddress": "0x..."
-}
-```
-
-#### Employee Login
-```http
-POST /api/auth/employee-login
-Content-Type: application/json
-
-{
-  "email": "employee@example.com",
-  "password": "password123"
-}
-```
-
-#### HR Registration
-```http
-POST /api/auth/hr-register
-Content-Type: application/json
-
-{
-  "walletAddress": "0x...",
-  "name": "John Doe",
-  "email": "john@example.com",
-  "role": "admin"
-}
-```
-
-### Leave Management Endpoints
-
-See [LEAVE_MANAGEMENT_API.md](./LEAVE_MANAGEMENT_API.md) for detailed documentation on leave management endpoints.
-
-Quick reference:
-- `POST /api/leave/apply` - Submit a leave request (Employee)
-- `GET /api/leave/my-leaves` - Get employee's leave history (Employee)
-- `GET /api/leave/all` - Get all leave requests with filtering (HR)
-- `POST /api/leave/:id/approve` - Approve a pending leave request (HR)
-- `POST /api/leave/:id/reject` - Reject a pending leave request (HR)
-
-### Protected Routes
-
-All protected routes require a JWT token in the Authorization header:
-```http
-Authorization: Bearer <token>
-```
-
-## 🔒 Security Notes
-
-1. Never commit your `.env` file
-2. Keep your private keys secure
-3. Use HTTPS in production
-4. Implement rate limiting in production
-5. Regularly rotate JWT secrets
-
-## 🧪 Testing
-
-Run tests:
-```bash
 npm test
 ```
 
-To run specific tests:
-```bash
-npm test -- -t "Leave Management API"
+For development with continuous testing:
+
+```
+npm run test:watch
 ```
 
-## 📝 Logging
+## Next Steps
 
-Logs are stored in the `logs` directory:
-- `error.log`: Error logs
-- `app.log`: All application logs
+1. **Service Layer Completion**:
+   - Implement `payrollService.js`
+   - Implement `certificateService.js`
+   - Implement `aiService.js`
 
-## 🔄 Blockchain Integration
+2. **New Feature Implementation**:
+   - Complete Payroll module
+   - Complete NFT Certificate module
+   - Implement AI Analytics
 
-The backend includes fallback mechanisms for blockchain operations. If a blockchain operation fails, the system will:
-1. Log the error
-2. Continue with database operations
-3. Mark the operation for retry
-4. Notify administrators
+3. **Performance Improvements**:
+   - Add response caching
+   - Implement background processing for blockchain operations
 
-## 🤖 AI Integration
+## License
 
-The AI module uses OpenAI's GPT-3.5-turbo model to:
-1. Analyze employee engagement
-2. Predict performance trends
-3. Suggest HR actions
-
-## 📊 Database Schema
-
-See `BACKEND_PLAN.md` for the complete database schema.
-See `DATABASE.md` for information about database design and usage. 
+This project is proprietary and confidential. 

@@ -5,10 +5,10 @@
 
 const express = require('express');
 const router = express.Router();
+const supabase = require('../utils/supabaseClient');
 const { authenticateHR, authenticateEmployee } = require('../middleware/authMiddleware');
 const { 
     updateEmployeeStatus, 
-    requestLeaveOfAbsence,
     getValidStatusTransitions
 } = require('../controllers/employeeController.status');
 const employeeController = require('../controllers/employeeController');
@@ -30,9 +30,6 @@ router.get('/status/transitions/:currentStatus', (req, res) => {
         valid_transitions: validTransitions
     });
 });
-
-// Employee routes for requesting leave
-router.post('/leave-request', authenticateEmployee, requestLeaveOfAbsence);
 
 // Get employee status history
 router.get('/:id/status-history', authenticateHR, async (req, res) => {

@@ -29,3 +29,76 @@
 {"level":"info","message":"Employee added to blockchain: 1c5659ce-5f5a-409a-be4e-a52c49b7f6f1, tx: 0x2be3092625731bf012d5a0bdabb22a7e342786d657b170e50776920f5f455726","service":"staffi-backend","timestamp":"2025-04-28 14:42:39"}
 {"level":"info","message":"Connecting to Ethereum network at: https://sepolia.infura.io/v3/REDACTED","service":"staffi-backend","timestamp":"2025-04-28 16:06:02"}
 {"level":"info","message":"Employee contract initialized at address: 0xf7014aaaD8CE7ae5054c6391C71D593adC64855c","service":"staffi-backend","timestamp":"2025-04-28 16:06:03"}
+{"level":"info","message":"Connecting to Ethereum network at: https://sepolia.infura.io/v3/REDACTED","service":"staffi-backend","timestamp":"2025-04-30 08:34:59"}
+{"level":"info","message":"Employee contract initialized at address: 0xf7014aaaD8CE7ae5054c6391C71D593adC64855c","service":"staffi-backend","timestamp":"2025-04-30 08:34:59"}
+{"level":"info","message":"Connecting to Ethereum network at: https://sepolia.infura.io/v3/REDACTED","service":"staffi-backend","timestamp":"2025-04-30 08:43:59"}
+{"level":"info","message":"Employee contract initialized at address: 0xf7014aaaD8CE7ae5054c6391C71D593adC64855c","service":"staffi-backend","timestamp":"2025-04-30 08:43:59"}
+{"level":"info","message":"Server running on port 3000","service":"staffi-backend","timestamp":"2025-04-30 08:43:59"}
+{"level":"info","message":"Server running in development mode on port 3000","service":"staffi-backend","timestamp":"2025-04-30 08:43:59"}
+{"level":"error","message":"","service":"staffi-backend","timestamp":"2025-04-30 08:44:00"}
+{"level":"info","message":"Connecting to Ethereum network at: https://sepolia.infura.io/v3/REDACTED","service":"staffi-backend","timestamp":"2025-04-30 08:48:58"}
+{"level":"info","message":"Employee contract initialized at address: 0x167c111790E69CAB988F18cd0Ac8f58B36138e70","service":"staffi-backend","timestamp":"2025-04-30 08:48:58"}
+{"level":"info","message":"Connecting to Ethereum network at: https://sepolia.infura.io/v3/REDACTED","service":"staffi-backend","timestamp":"2025-04-30 09:37:47"}
+{"level":"info","message":"Employee contract initialized at address: 0x167c111790E69CAB988F18cd0Ac8f58B36138e70","service":"staffi-backend","timestamp":"2025-04-30 09:37:47"}
+{"level":"info","message":"Connecting to Ethereum network at: https://sepolia.infura.io/v3/REDACTED","service":"staffi-backend","timestamp":"2025-04-30 09:45:03"}
+{"level":"info","message":"Employee contract initialized at address: 0x167c111790E69CAB988F18cd0Ac8f58B36138e70","service":"staffi-backend","timestamp":"2025-04-30 09:45:03"}
+{"level":"info","message":"Connecting to Ethereum network at: https://sepolia.infura.io/v3/REDACTED","service":"staffi-backend","timestamp":"2025-04-30 09:49:29"}
+{"level":"info","message":"Employee contract initialized at address: 0x167c111790E69CAB988F18cd0Ac8f58B36138e70","service":"staffi-backend","timestamp":"2025-04-30 09:49:29"}
+{"level":"info","message":"Server running on port 3000","service":"staffi-backend","timestamp":"2025-04-30 09:49:29"}
+{"level":"error","message":"","service":"staffi-backend","timestamp":"2025-04-30 09:49:29"}
+{"level":"info","message":"Connecting to Ethereum network at: https://sepolia.infura.io/v3/REDACTED","service":"staffi-backend","timestamp":"2025-04-30 09:51:20"}
+{"level":"info","message":"Employee contract initialized at address: 0x167c111790E69CAB988F18cd0Ac8f58B36138e70","service":"staffi-backend","timestamp":"2025-04-30 09:51:20"}
+{"level":"info","message":"Connecting to Ethereum network at: https://sepolia.infura.io/v3/REDACTED","service":"staffi-backend","timestamp":"2025-04-30 10:00:38"}
+{"level":"info","message":"Employee contract initialized at address: 0x167c111790E69CAB988F18cd0Ac8f58B36138e70","service":"staffi-backend","timestamp":"2025-04-30 10:00:38"}
+{"level":"info","message":"Starting employee-blockchain synchronization","service":"staffi-backend","timestamp":"2025-04-30 10:00:38"}
+{"level":"info","message":"Found 3 employees in database","service":"staffi-backend","timestamp":"2025-04-30 10:00:40"}
+{"level":"info","message":"Adding employee 7c97fd28-a460-4952-804c-31e096914201 (Uttam Vaghasia) to blockchain...","service":"staffi-backend","timestamp":"2025-04-30 10:00:40"}
+{"level":"info","message":"Employee added to blockchain: 7c97fd28-a460-4952-804c-31e096914201, tx: 0x4ce7ac2c456a3e7799d0cc0e7f6f411faf013edb6b2f39ddb1fdea4a73396a23","service":"staffi-backend","timestamp":"2025-04-30 10:00:54"}
+{"level":"info","message":"Successfully added employee 7c97fd28-a460-4952-804c-31e096914201 to blockchain, tx: 0x4ce7ac2c456a3e7799d0cc0e7f6f411faf013edb6b2f39ddb1fdea4a73396a23","service":"staffi-backend","timestamp":"2025-04-30 10:00:54"}
+{"level":"info","message":"Setting initial status for employee 7c97fd28-a460-4952-804c-31e096914201 (Uttam Vaghasia) to ACTIVE on blockchain...","service":"staffi-backend","timestamp":"2025-04-30 10:00:54"}
+{"level":"info","message":"Employee status update recorded on blockchain for employee ID: 7c97fd28-a460-4952-804c-31e096914201, status: ACTIVE, tx: 0x83c3619a0fe06e793f7561addee96fc4cc1fc2512e62213de74447ceebd3ea00","service":"staffi-backend","timestamp":"2025-04-30 10:01:13"}
+{"level":"info","message":"Successfully set initial status for employee 7c97fd28-a460-4952-804c-31e096914201 to ACTIVE, tx: 0x83c3619a0fe06e793f7561addee96fc4cc1fc2512e62213de74447ceebd3ea00","service":"staffi-backend","timestamp":"2025-04-30 10:01:13"}
+{"level":"info","message":"Adding employee 1c5659ce-5f5a-409a-be4e-a52c49b7f6f1 (ME) to blockchain...","service":"staffi-backend","timestamp":"2025-04-30 10:01:13"}
+{"level":"info","message":"Employee added to blockchain: 1c5659ce-5f5a-409a-be4e-a52c49b7f6f1, tx: 0xf7254a0448f2bf3535c8d9f72f1fdd1d0864837f24f756a2d52cddaf99d32ad8","service":"staffi-backend","timestamp":"2025-04-30 10:01:27"}
+{"level":"info","message":"Successfully added employee 1c5659ce-5f5a-409a-be4e-a52c49b7f6f1 to blockchain, tx: 0xf7254a0448f2bf3535c8d9f72f1fdd1d0864837f24f756a2d52cddaf99d32ad8","service":"staffi-backend","timestamp":"2025-04-30 10:01:27"}
+{"level":"info","message":"Setting initial status for employee 1c5659ce-5f5a-409a-be4e-a52c49b7f6f1 (ME) to ACTIVE on blockchain...","service":"staffi-backend","timestamp":"2025-04-30 10:01:27"}
+{"level":"info","message":"Employee status update recorded on blockchain for employee ID: 1c5659ce-5f5a-409a-be4e-a52c49b7f6f1, status: ACTIVE, tx: 0x102bd76f172346220c2d73ecc144ae8d0c39483077a190ca309d58dd47cc3aef","service":"staffi-backend","timestamp":"2025-04-30 10:01:41"}
+{"level":"info","message":"Successfully set initial status for employee 1c5659ce-5f5a-409a-be4e-a52c49b7f6f1 to ACTIVE, tx: 0x102bd76f172346220c2d73ecc144ae8d0c39483077a190ca309d58dd47cc3aef","service":"staffi-backend","timestamp":"2025-04-30 10:01:41"}
+{"level":"info","message":"Adding employee e9194009-a5aa-4245-8e4d-6f740b197bf2 (Mr. Uttam Vaghasia) to blockchain...","service":"staffi-backend","timestamp":"2025-04-30 10:01:41"}
+{"level":"info","message":"Employee added to blockchain: e9194009-a5aa-4245-8e4d-6f740b197bf2, tx: 0x5957eea32fec1f28b7d3cf0e1ef0cc74c836d42c5887cbdb9887ae9f4f4bf9aa","service":"staffi-backend","timestamp":"2025-04-30 10:01:49"}
+{"level":"info","message":"Successfully added employee e9194009-a5aa-4245-8e4d-6f740b197bf2 to blockchain, tx: 0x5957eea32fec1f28b7d3cf0e1ef0cc74c836d42c5887cbdb9887ae9f4f4bf9aa","service":"staffi-backend","timestamp":"2025-04-30 10:01:49"}
+{"level":"info","message":"Setting initial status for employee e9194009-a5aa-4245-8e4d-6f740b197bf2 (Mr. Uttam Vaghasia) to ACTIVE on blockchain...","service":"staffi-backend","timestamp":"2025-04-30 10:01:49"}
+{"level":"info","message":"Employee status update recorded on blockchain for employee ID: e9194009-a5aa-4245-8e4d-6f740b197bf2, status: ACTIVE, tx: 0xa8e648009814013745a800dda12f776bf7b814151c9a74147266148992b3952d","service":"staffi-backend","timestamp":"2025-04-30 10:02:02"}
+{"level":"info","message":"Connecting to Ethereum network at: https://sepolia.infura.io/v3/REDACTED","service":"staffi-backend","timestamp":"2025-04-30 10:02:39"}
+{"level":"info","message":"Employee contract initialized at address: 0x167c111790E69CAB988F18cd0Ac8f58B36138e70","service":"staffi-backend","timestamp":"2025-04-30 10:02:40"}
+{"level":"info","message":"=== STARTING FULL BLOCKCHAIN SYNCHRONIZATION ===","service":"staffi-backend","timestamp":"2025-04-30 10:02:40"}
+{"level":"info","message":"Timestamp: 2025-04-30T04:32:40.035Z","service":"staffi-backend","timestamp":"2025-04-30 10:02:40"}
+{"level":"info","message":"Starting employee-blockchain synchronization","service":"staffi-backend","timestamp":"2025-04-30 10:02:41"}
+{"level":"info","message":"Found 3 employees in database","service":"staffi-backend","timestamp":"2025-04-30 10:02:41"}
+{"level":"info","message":"Employee 7c97fd28-a460-4952-804c-31e096914201 (Uttam Vaghasia) already exists on blockchain","service":"staffi-backend","timestamp":"2025-04-30 10:02:41"}
+{"level":"info","message":"Updating status for employee 7c97fd28-a460-4952-804c-31e096914201 (Uttam Vaghasia) to ACTIVE on blockchain...","service":"staffi-backend","timestamp":"2025-04-30 10:02:41"}
+{"level":"info","message":"Employee status update recorded on blockchain for employee ID: 7c97fd28-a460-4952-804c-31e096914201, status: ACTIVE, tx: 0xe4e51cc7241035776390388f7bf96a443b271bb954e8ae6394e78ec3e3564e8e","service":"staffi-backend","timestamp":"2025-04-30 10:02:49"}
+{"level":"info","message":"Successfully updated status for employee 7c97fd28-a460-4952-804c-31e096914201 to ACTIVE, tx: 0xe4e51cc7241035776390388f7bf96a443b271bb954e8ae6394e78ec3e3564e8e","service":"staffi-backend","timestamp":"2025-04-30 10:02:49"}
+{"level":"info","message":"Employee 1c5659ce-5f5a-409a-be4e-a52c49b7f6f1 (ME) already exists on blockchain","service":"staffi-backend","timestamp":"2025-04-30 10:02:50"}
+{"level":"info","message":"Updating status for employee 1c5659ce-5f5a-409a-be4e-a52c49b7f6f1 (ME) to ACTIVE on blockchain...","service":"staffi-backend","timestamp":"2025-04-30 10:02:50"}
+{"level":"info","message":"Employee status update recorded on blockchain for employee ID: 1c5659ce-5f5a-409a-be4e-a52c49b7f6f1, status: ACTIVE, tx: 0x1c04ca945d5798f3ebd69a3ac6088645473e4ca9ab3c2efc2f9f86ca5135a444","service":"staffi-backend","timestamp":"2025-04-30 10:03:03"}
+{"level":"info","message":"Successfully updated status for employee 1c5659ce-5f5a-409a-be4e-a52c49b7f6f1 to ACTIVE, tx: 0x1c04ca945d5798f3ebd69a3ac6088645473e4ca9ab3c2efc2f9f86ca5135a444","service":"staffi-backend","timestamp":"2025-04-30 10:03:03"}
+{"level":"info","message":"Employee e9194009-a5aa-4245-8e4d-6f740b197bf2 (Mr. Uttam Vaghasia) already exists on blockchain","service":"staffi-backend","timestamp":"2025-04-30 10:03:04"}
+{"level":"info","message":"Updating status for employee e9194009-a5aa-4245-8e4d-6f740b197bf2 (Mr. Uttam Vaghasia) to ACTIVE on blockchain...","service":"staffi-backend","timestamp":"2025-04-30 10:03:04"}
+{"level":"info","message":"Employee status update recorded on blockchain for employee ID: e9194009-a5aa-4245-8e4d-6f740b197bf2, status: ACTIVE, tx: 0x3848dd0e00836bb989736db1afe258aa3f1bb1c3583fb3c44167eb6877df531b","service":"staffi-backend","timestamp":"2025-04-30 10:03:17"}
+{"level":"info","message":"Successfully updated status for employee e9194009-a5aa-4245-8e4d-6f740b197bf2 to ACTIVE, tx: 0x3848dd0e00836bb989736db1afe258aa3f1bb1c3583fb3c44167eb6877df531b","service":"staffi-backend","timestamp":"2025-04-30 10:03:17"}
+{"level":"info","message":"Employee synchronization complete:","service":"staffi-backend","timestamp":"2025-04-30 10:03:17"}
+{"level":"info","message":"  Employees already on blockchain: 3","service":"staffi-backend","timestamp":"2025-04-30 10:03:17"}
+{"level":"info","message":"  Employees successfully added: 0","service":"staffi-backend","timestamp":"2025-04-30 10:03:17"}
+{"level":"info","message":"  Failed additions: 0","service":"staffi-backend","timestamp":"2025-04-30 10:03:17"}
+{"level":"info","message":"  Status updates successful: 3","service":"staffi-backend","timestamp":"2025-04-30 10:03:17"}
+{"level":"info","message":"  Status updates failed: 0","service":"staffi-backend","timestamp":"2025-04-30 10:03:17"}
+{"level":"info","message":"Starting employee status history blockchain synchronization","service":"staffi-backend","timestamp":"2025-04-30 10:03:17"}
+{"code":"42703","details":null,"hint":null,"level":"error","message":"column employee_status_history.blockchain_tx does not exist","service":"staffi-backend","timestamp":"2025-04-30 10:03:17"}
+{"level":"info","message":"Employee status update recorded on blockchain for employee ID: e9194009-a5aa-4245-8e4d-6f740b197bf2, status: SUSPENDED, tx: 0xb8a81bde3c0fa89962401e4a05b53cf6569cee562af5fee70c290a92616832b3","service":"staffi-backend","timestamp":"2025-04-30 10:03:52"}
+{"level":"info","message":"Employee status update recorded on blockchain for employee ID: e9194009-a5aa-4245-8e4d-6f740b197bf2, status: ACTIVE, tx: 0x449410a25ded5998dba556d5a113767784e0b4dc3344a13a98ea06ffe1e2c7d4","service":"staffi-backend","timestamp":"2025-04-30 10:06:42"}
+{"level":"info","message":"Connecting to Ethereum network at: https://sepolia.infura.io/v3/REDACTED","service":"staffi-backend","timestamp":"2025-04-30 10:59:35"}
+{"level":"info","message":"Employee contract initialized at address: 0x167c111790E69CAB988F18cd0Ac8f58B36138e70","service":"staffi-backend","timestamp":"2025-04-30 10:59:35"}
+{"level":"info","message":"Leave approval recorded on blockchain for employee ID: e9194009-a5aa-4245-8e4d-6f740b197bf2, tx: 0x35914b66a00870c516be7bb8ea8e4feb9a70dd974a1759dbc2e32df155b0aee6","service":"staffi-backend","timestamp":"2025-04-30 11:03:24"}
+{"level":"info","message":"Employee status update recorded on blockchain for employee ID: e9194009-a5aa-4245-8e4d-6f740b197bf2, status: ON_LEAVE, tx: 0x676b522d1fe47898b416e35c51b097851881318f8185f1e29deca36addadd830","service":"staffi-backend","timestamp":"2025-04-30 11:03:50"}
+{"level":"info","message":"Employee status update recorded on blockchain for employee ID: e9194009-a5aa-4245-8e4d-6f740b197bf2, status: ACTIVE, tx: 0x72cde238208c1e8d6666bdaef553d5b59d8555eb01260840008c8268a5daf41b","service":"staffi-backend","timestamp":"2025-04-30 11:10:05"}

@@ -252,6 +252,22 @@ const getEmployeeById = async (req, res, next) => {
     }
 };
 
+// Get employee's own profile (for employee)
+const getEmployeeProfile = async (req, res, next) => {
+    try {
+        const employee = await Employee.findByPk(req.user.id);
+        
+        if (!employee) {
+            return res.status(404).json({ message: 'Employee profile not found' });
+        }
+        
+        res.status(200).json(employee);
+    } catch (error) {
+        logger.error(`Error getting employee profile for ID ${req.user.id}:`, error);
+        next(error);
+    }
+};
+
 // Connect wallet to employee account
 const connectWallet = async (req, res) => {
     try {
@@ -467,8 +483,63 @@ const addEmployeeToBlockchain = async (req, res) => {
 // Create a new employee
 const createEmployee = async (req, res, next) => {
     try {
+        // Create employee in database
         const employee = await Employee.create(req.body);
-        res.status(201).json(employee);
+        
+        // Automatically add to blockchain
+        let blockchainTxHash = null;
+        let blockchainSuccess = false;
+        
+        try {
+            // Get role and department names
+            const { role, department } = await getRoleAndDepartmentNames(
+                employee.role_id,
+                employee.department_id
+            );
+            
+            // Check blockchain availability
+            const blockchainAvailable = await blockchainService.isBlockchainAvailable();
+            
+            if (blockchainAvailable) {
+                // Add to blockchain
+                const result = await blockchainService.addEmployeeToBlockchain(
+                    employee.id,
+                    employee.name,
+                    employee.wallet || null, // Use wallet if provided
+                    role,
+                    employee.doj,
+                    department
+                );
+                
+                if (result.success) {
+                    blockchainTxHash = result.txHash;
+                    blockchainSuccess = true;
+                    
+                    // Update employee record with blockchain transaction
+                    await Employee.update(
+                        { blockchain_tx: result.txHash },
+                        { where: { id: employee.id } }
+                    );
+                    
+                    logger.info(`New employee ${employee.name} added to blockchain: ${blockchainTxHash}`);
+                } else {
+                    logger.error(`Failed to add employee to blockchain: ${result.reason}`);
+                }
+            } else {
+                logger.warn('Blockchain service unavailable, employee added to database only');
+            }
+        } catch (blockchainError) {
+            logger.error(`Error adding employee to blockchain: ${blockchainError.message}`);
+        }
+        
+        // Respond with employee data and blockchain status
+        res.status(201).json({
+            employee,
+            blockchain: {
+                success: blockchainSuccess,
+                transaction: blockchainTxHash
+            }
+        });
     } catch (error) {
         logger.error('Error creating employee:', error);
         
@@ -487,6 +558,7 @@ const createEmployee = async (req, res, next) => {
 // Update an employee
 const updateEmployee = async (req, res, next) => {
     try {
+        // Update employee in database
         const [updated] = await Employee.update(req.body, {
             where: { id: req.params.id },
             returning: true
@@ -497,7 +569,68 @@ const updateEmployee = async (req, res, next) => {
         }
         
         const updatedEmployee = await Employee.findByPk(req.params.id);
-        res.status(200).json(updatedEmployee);
+        
+        // Check if employee exists on blockchain and update if needed
+        let blockchainStatus = {
+            exists: false,
+            needsUpdate: false,
+            transaction: null
+        };
+        
+        try {
+            // Check if employee exists on blockchain
+            const existsOnBlockchain = await blockchainService.checkEmployeeExistsOnBlockchain(req.params.id);
+            blockchainStatus.exists = existsOnBlockchain.exists;
+            
+            // If employee doesn't exist on blockchain yet, add them
+            if (!existsOnBlockchain.exists) {
+                blockchainStatus.needsUpdate = true;
+                
+                // Get role and department names
+                const { role, department } = await getRoleAndDepartmentNames(
+                    updatedEmployee.role_id,
+                    updatedEmployee.department_id
+                );
+                
+                // Check blockchain availability
+                const blockchainAvailable = await blockchainService.isBlockchainAvailable();
+                
+                if (blockchainAvailable) {
+                    // Add to blockchain
+                    const result = await blockchainService.addEmployeeToBlockchain(
+                        updatedEmployee.id,
+                        updatedEmployee.name,
+                        updatedEmployee.wallet || null,
+                        role,
+                        updatedEmployee.doj,
+                        department
+                    );
+                    
+                    if (result.success) {
+                        blockchainStatus.transaction = result.txHash;
+                        
+                        // Update employee record with blockchain transaction
+                        await Employee.update(
+                            { blockchain_tx: result.txHash },
+                            { where: { id: updatedEmployee.id } }
+                        );
+                        
+                        logger.info(`Employee ${updatedEmployee.name} added to blockchain during update: ${result.txHash}`);
+                    } else {
+                        logger.error(`Failed to add employee to blockchain during update: ${result.reason}`);
+                    }
+                } else {
+                    logger.warn('Blockchain service unavailable, employee updated in database only');
+                }
+            }
+        } catch (blockchainError) {
+            logger.error(`Error checking/updating blockchain for employee: ${blockchainError.message}`);
+        }
+        
+        res.status(200).json({
+            employee: updatedEmployee,
+            blockchain: blockchainStatus
+        });
     } catch (error) {
         logger.error(`Error updating employee with ID ${req.params.id}:`, error);
         
@@ -531,16 +664,372 @@ const deleteEmployee = async (req, res, next) => {
     }
 };
 
+// Update employee profile (for employee)
+const updateEmployeeProfile = async (req, res, next) => {
+    try {
+        const { name, email } = req.body;
+        const updates = {};
+        
+        if (name) updates.name = name;
+        if (email) updates.email = email;
+        
+        const [updated] = await Employee.update(updates, {
+            where: { id: req.user.id },
+            returning: true
+        });
+        
+        if (updated === 0) {
+            return res.status(404).json({ message: 'Employee not found' });
+        }
+        
+        const updatedEmployee = await Employee.findByPk(req.user.id);
+        res.status(200).json({
+            message: 'Profile updated successfully',
+            employee: updatedEmployee
+        });
+    } catch (error) {
+        logger.error(`Error updating employee profile for ID ${req.user.id}:`, error);
+        next(error);
+    }
+};
+
+// Update employee wallet (for employee)
+const updateEmployeeWallet = async (req, res, next) => {
+    try {
+        const { wallet } = req.body;
+        
+        if (!wallet) {
+            return res.status(400).json({ message: 'Wallet address is required' });
+        }
+        
+        const [updated] = await Employee.update({ wallet }, {
+            where: { id: req.user.id },
+            returning: true
+        });
+        
+        if (updated === 0) {
+            return res.status(404).json({ message: 'Employee not found' });
+        }
+        
+        const updatedEmployee = await Employee.findByPk(req.user.id);
+        res.status(200).json({
+            message: 'Wallet updated successfully',
+            employee: updatedEmployee
+        });
+    } catch (error) {
+        logger.error(`Error updating wallet for employee ID ${req.user.id}:`, error);
+        next(error);
+    }
+};
+
+// Get all employee requests (for HR)
+const getAllEmployeeRequests = async (req, res) => {
+    try {
+        const { status } = req.query;
+        
+        let query = supabase
+            .from('employee_requests')
+            .select(`
+                *,
+                roles(role_name),
+                departments(dept_name)
+            `);
+            
+        if (status) {
+            query = query.eq('status', status.toUpperCase());
+        }
+        
+        const { data, error } = await query.order('created_at', { ascending: false });
+            
+        if (error) {
+            console.error('Error fetching employee requests:', error);
+            return res.status(500).json({ error: 'Failed to fetch employee requests' });
+        }
+        
+        const formattedRequests = data.map(request => ({
+            id: request.id,
+            name: request.name,
+            email: request.email,
+            role_id: request.role_id,
+            role_name: request.roles?.role_name,
+            department_id: request.department_id,
+            department_name: request.departments?.dept_name,
+            status: request.status,
+            created_at: request.created_at,
+            approved_by: request.approved_by,
+            approved_at: request.approved_at,
+            rejection_reason: request.rejection_reason
+        }));
+        
+        res.json({
+            message: 'Employee requests retrieved successfully',
+            requests: formattedRequests
+        });
+    } catch (error) {
+        console.error('Error in getAllEmployeeRequests:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+// Approve employee request (for HR)
+const approveEmployeeRequest = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        if (!id) {
+            return res.status(400).json({ error: 'Request ID is required' });
+        }
+        
+        // Check if request exists and is pending
+        const { data: request, error: requestError } = await supabase
+            .from('employee_requests')
+            .select('*')
+            .eq('id', id)
+            .single();
+            
+        if (requestError || !request) {
+            console.error('Error fetching request:', requestError);
+            return res.status(404).json({ error: 'Request not found' });
+        }
+        
+        if (request.status !== 'PENDING') {
+            return res.status(400).json({ 
+                error: `Request already ${request.status.toLowerCase()}`,
+                status: request.status 
+            });
+        }
+        
+        // Update request status
+        const { data: updatedRequest, error: updateError } = await supabase
+            .from('employee_requests')
+            .update({
+                status: 'APPROVED',
+                approved_by: req.user.id,
+                approved_at: new Date().toISOString()
+            })
+            .eq('id', id)
+            .select()
+            .single();
+            
+        if (updateError) {
+            console.error('Error updating request:', updateError);
+            return res.status(500).json({ error: 'Failed to approve request' });
+        }
+        
+        // Create employee from request data
+        const employee = await _addEmployee(request);
+        
+        // Get role and department names for blockchain
+        const { role, department } = await getRoleAndDepartmentNames(
+            request.role_id, 
+            request.department_id
+        );
+        
+        // Automatically add to blockchain
+        let blockchainTxHash = null;
+        let blockchainSuccess = false;
+        
+        try {
+            // Check blockchain availability
+            const blockchainAvailable = await blockchainService.isBlockchainAvailable();
+            
+            if (blockchainAvailable) {
+                // Add to blockchain
+                const result = await blockchainService.addEmployeeToBlockchain(
+                    employee.id,
+                    employee.name,
+                    null, // No wallet initially
+                    role,
+                    employee.doj,
+                    department
+                );
+                
+                if (result.success) {
+                    blockchainTxHash = result.txHash;
+                    blockchainSuccess = true;
+                    
+                    // Update employee record with blockchain transaction
+                    await supabase
+                        .from('employees')
+                        .update({ blockchain_tx: result.txHash })
+                        .eq('id', employee.id);
+                    
+                    console.log(`✅ New employee ${employee.name} added to blockchain: ${blockchainTxHash}`);
+                } else {
+                    console.error('❌ Failed to add employee to blockchain:', result.reason);
+                }
+            } else {
+                console.warn('⚠️ Blockchain service unavailable, employee added to database only');
+            }
+        } catch (blockchainError) {
+            console.error('❌ Error adding employee to blockchain:', blockchainError);
+        }
+        
+        res.json({
+            message: 'Employee request approved successfully',
+            request: updatedRequest,
+            employee,
+            blockchain: {
+                success: blockchainSuccess,
+                transaction: blockchainTxHash
+            }
+        });
+    } catch (error) {
+        console.error('Error in approveEmployeeRequest:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+// Reject employee request (for HR)
+const rejectEmployeeRequest = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { reason } = req.body;
+        
+        if (!id) {
+            return res.status(400).json({ error: 'Request ID is required' });
+        }
+        
+        // Check if request exists and is pending
+        const { data: request, error: requestError } = await supabase
+            .from('employee_requests')
+            .select('*')
+            .eq('id', id)
+            .single();
+            
+        if (requestError || !request) {
+            console.error('Error fetching request:', requestError);
+            return res.status(404).json({ error: 'Request not found' });
+        }
+        
+        if (request.status !== 'PENDING') {
+            return res.status(400).json({ 
+                error: `Request already ${request.status.toLowerCase()}`,
+                status: request.status 
+            });
+        }
+        
+        // Update request status
+        const { data: updatedRequest, error: updateError } = await supabase
+            .from('employee_requests')
+            .update({
+                status: 'REJECTED',
+                rejected_by: req.user.id,
+                rejected_at: new Date().toISOString(),
+                rejection_reason: reason
+            })
+            .eq('id', id)
+            .select()
+            .single();
+            
+        if (updateError) {
+            console.error('Error updating request:', updateError);
+            return res.status(500).json({ error: 'Failed to reject request' });
+        }
+        
+        res.json({
+            message: 'Employee request rejected successfully',
+            request: updatedRequest
+        });
+    } catch (error) {
+        console.error('Error in rejectEmployeeRequest:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+// Update employee blockchain wallet (for HR)
+const updateEmployeeBlockchainWallet = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { wallet } = req.body;
+        
+        if (!id) {
+            return res.status(400).json({ error: 'Employee ID is required' });
+        }
+        
+        if (!wallet) {
+            return res.status(400).json({ error: 'Wallet address is required' });
+        }
+        
+        // Check if employee exists
+        const { data: employee, error: employeeError } = await supabase
+            .from('employees')
+            .select('id, name')
+            .eq('id', id)
+            .single();
+            
+        if (employeeError || !employee) {
+            console.error('Error fetching employee:', employeeError);
+            return res.status(404).json({ error: 'Employee not found' });
+        }
+        
+        // Check if employee exists on blockchain first
+        const blockchainStatus = await blockchainService.checkEmployeeExistsOnBlockchain(id);
+        
+        if (!blockchainStatus.exists) {
+            return res.status(400).json({ 
+                error: 'Employee must be added to blockchain first',
+                employeeId: id,
+                name: employee.name
+            });
+        }
+        
+        // Update wallet on blockchain
+        const result = await blockchainService.updateEmployeeWallet(id, wallet);
+        
+        if (!result.success) {
+            return res.status(503).json({
+                error: 'Failed to update employee wallet on blockchain',
+                reason: result.reason,
+                employeeId: id,
+                name: employee.name
+            });
+        }
+        
+        // Update wallet in database
+        const { data: updatedEmployee, error: updateError } = await supabase
+            .from('employees')
+            .update({ wallet })
+            .eq('id', id)
+            .select()
+            .single();
+            
+        if (updateError) {
+            console.error('Error updating employee wallet:', updateError);
+            return res.status(500).json({ error: 'Failed to update employee wallet in database' });
+        }
+        
+        res.json({
+            success: true,
+            message: 'Employee wallet updated successfully on blockchain and in database',
+            employeeId: id,
+            name: employee.name,
+            wallet,
+            transaction: result.txHash
+        });
+    } catch (error) {
+        console.error('Error updating employee wallet:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
 module.exports = {
     getAllRoles,
     getAllDepartments,
     requestEmployeeSignup,
     getAllEmployees,
     getEmployeeById,
+    getEmployeeProfile,
+    updateEmployeeProfile,
+    updateEmployeeWallet,
+    getAllEmployeeRequests,
+    approveEmployeeRequest,
+    rejectEmployeeRequest,
     connectWallet,
     disconnectWallet,
     checkEmployeeBlockchainStatus,
     addEmployeeToBlockchain,
+    updateEmployeeBlockchainWallet,
     _addEmployee, // Export for internal use in HR controller
     createEmployee,
     updateEmployee,
