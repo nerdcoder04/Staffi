@@ -147,7 +147,7 @@ class Employee {
                     status,
                     doj
                 `)
-                .eq('wallet', walletAddress.toLowerCase())
+                .eq('wallet', walletAddress)
                 .single();
 
             if (error) throw error;

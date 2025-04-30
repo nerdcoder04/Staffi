@@ -284,7 +284,7 @@ const connectWallet = async (req, res) => {
         const { data: existingWallet, error: checkError } = await supabase
             .from('employees')
             .select('id, email')
-            .eq('wallet', walletAddress.toLowerCase())
+            .eq('wallet', walletAddress)
             .neq('id', employeeId)
             .single();
 
@@ -297,7 +297,7 @@ const connectWallet = async (req, res) => {
         // Update employee with wallet address
         const { data, error } = await supabase
             .from('employees')
-            .update({ wallet: walletAddress.toLowerCase() })
+            .update({ wallet: walletAddress })
             .eq('id', employeeId)
             .select()
             .single();

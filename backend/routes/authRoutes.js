@@ -81,7 +81,7 @@ router.post('/hr-login', async (req, res) => {
         const { data: hrUser, error } = await supabase
             .from('hr_users')
             .select('*')
-            .eq('wallet', walletAddress.toLowerCase())
+            .eq('wallet', walletAddress)
             .single();
 
         if (error) {

@@ -19,7 +19,7 @@ router.post('/add', async (req, res) => {
         const { data: existingUser, error: checkError } = await supabase
             .from('hr_users')
             .select('wallet')
-            .eq('wallet', walletAddress.toLowerCase())
+            .eq('wallet', walletAddress)
             .single();
 
         if (existingUser) {
@@ -42,7 +42,7 @@ router.post('/add', async (req, res) => {
             .from('hr_users')
             .insert([
                 {
-                    wallet: walletAddress.toLowerCase(),
+                    wallet: walletAddress,
                     name,
                     email
                 }

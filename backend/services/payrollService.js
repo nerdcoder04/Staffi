@@ -4,7 +4,7 @@
  */
 
 const logger = require('../utils/logger');
-const supabase = require('./supabaseService');
+const supabase = require('../utils/supabaseClient');
 const ethers = require('ethers');
 const fs = require('fs');
 const path = require('path');

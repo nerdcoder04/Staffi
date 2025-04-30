@@ -1,14 +1,24 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import StaffiButton from "@/components/ui/staffi-button";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { useMetaMask } from "@/contexts/MetaMaskContext";
+import { useUser } from "@/contexts/UserContext";
+import { loginHR } from "@/lib/api";
+
+// Setup logger function for debugging
+const logEvent = (event: string, data?: any) => {
+  console.log(`[STAFFI Auth] ${event}`, data || '');
+};
 
 const HeroSection = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  const { isConnected, account, openModal } = useMetaMask();
+  const { isConnected, account, connect, disconnect, openModal } = useMetaMask();
+  const { setUser } = useUser();
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [hasFailedAuth, setHasFailedAuth] = useState(false);
   
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -36,21 +46,125 @@ const HeroSection = () => {
     };
   }, []);
 
+  // Effect to authenticate when account changes and hasn't just failed auth
+  useEffect(() => {
+    const handleAccountChange = async () => {
+      if (isConnected && account && !isAuthenticating) {
+        if (hasFailedAuth) {
+          // Reset the failed auth state but don't automatically authenticate
+          setHasFailedAuth(false);
+          logEvent('Account changed after failed auth, awaiting manual login attempt');
+        } else {
+          logEvent('Account connected, attempting authentication', account);
+          await authenticateHR(account);
+        }
+      }
+    };
+
+    handleAccountChange();
+  }, [account, isConnected]);
+
+  const disconnectWallet = async () => {
+    logEvent('Disconnecting wallet');
+    try {
+      await disconnect();
+      setHasFailedAuth(true);
+      logEvent('Wallet disconnected successfully');
+    } catch (error) {
+      logEvent('Error disconnecting wallet', error);
+    }
+  };
+
+  const authenticateHR = async (walletAddress: string) => {
+    if (!walletAddress) {
+      logEvent('Authentication failed - No wallet address provided');
+      return false;
+    }
+    
+    setIsAuthenticating(true);
+    logEvent('Starting authentication', { walletAddress });
+    
+    try {
+      const result = await loginHR(walletAddress);
+      logEvent('Authentication response received', result);
+
+      if (result.success && result.data) {
+        // User authenticated successfully
+        setUser(result.data.user);
+        setHasFailedAuth(false);
+        logEvent('Authentication successful', result.data.user);
+        
+        toast.success("Login successful", {
+          description: `Welcome back, ${result.data.user.name}`,
+          duration: 3000,
+          position: "bottom-center",
+          className: "bg-white text-gray-900"
+        });
+        
+        navigate('/dashboard');
+        return true;
+      } else {
+        // Authentication failed
+        logEvent('Authentication failed - HR user not found', result.error);
+        
+        toast.error("Authentication failed", {
+          description: "HR user not found for this wallet. Please use a registered wallet.",
+          duration: 5000,
+          position: "bottom-center",
+          className: "bg-white text-gray-900"
+        });
+        
+        await disconnectWallet();
+        return false;
+      }
+    } catch (error) {
+      logEvent('Authentication error', error);
+      
+      toast.error("Authentication error", {
+        description: "Failed to authenticate with the server. Please try again.",
+        duration: 3000,
+        position: "bottom-center",
+        className: "bg-white text-gray-900"
+      });
+      
+      await disconnectWallet();
+      return false;
+    } finally {
+      setIsAuthenticating(false);
+    }
+  };
+
   const handleConnectWallet = async () => {
-    if (isConnected) {
-      navigate('/dashboard');
+    if (isConnected && account && !hasFailedAuth) {
+      // If already connected and hasn't failed authentication, try to authenticate
+      logEvent('Already connected, attempting authentication', account);
+      await authenticateHR(account);
       return;
     }
     
+    // If the wallet is connected but auth failed previously, disconnect before trying again
+    if (isConnected && hasFailedAuth) {
+      logEvent('Disconnecting before reconnecting due to previous authentication failure');
+      await disconnectWallet();
+    }
+    
     try {
+      // Open MetaMask modal for connection
+      logEvent('Opening MetaMask modal');
       openModal();
+      
       toast.success("Select your wallet to continue", {
         description: "Connect with MetaMask to access the dashboard",
         duration: 2000,
         position: "bottom-center",
         className: "bg-white text-gray-900"
       });
+      
+      // The account connection will be handled by the useEffect above
+      // when the account state changes
     } catch (error) {
+      logEvent('Failed to open wallet selection', error);
+      
       toast.error("Failed to open wallet selection", {
         description: "Please try again",
         duration: 3000,
@@ -126,8 +240,8 @@ const HeroSection = () => {
             transition={{ duration: 0.8, delay: 0.6 }}
             className="flex flex-col sm:flex-row gap-4 justify-center mb-16"
           >
-            <StaffiButton size="lg" onClick={handleConnectWallet}>
-              {isConnected ? `Dashboard` : 'Connect Wallet'}
+            <StaffiButton size="lg" onClick={handleConnectWallet} disabled={isAuthenticating}>
+              {isAuthenticating ? 'Authenticating...' : isConnected && !hasFailedAuth ? 'Dashboard' : 'Connect Wallet'}
             </StaffiButton>
             <StaffiButton variant="outline" size="lg" onClick={handleLearnMore}>
               Learn More

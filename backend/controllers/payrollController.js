@@ -5,7 +5,7 @@
 
 const logger = require('../utils/logger');
 const payrollService = require('../services/payrollService');
-const supabase = require('../services/supabaseService');
+const supabase = require('../utils/supabaseClient');
 
 /**
  * Send payroll transaction
