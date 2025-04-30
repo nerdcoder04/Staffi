@@ -179,110 +179,191 @@ Authorization: Bearer <hr_token>
 }
 ```
 
-## 🍃 Leave Management
+### Employee Status Management
 
-### Current Endpoints
+#### Get Employee Status History
 
-| Method | Endpoint | Description | Auth Required | Role | Status |
-|--------|----------|-------------|--------------|------|--------|
-| POST | `/api/leave/apply` | Submit a leave request | Yes | Employee | ✅ Implemented |
-| GET | `/api/leave/my-leaves` | Get employee's leave history | Yes | Employee | ✅ Implemented |
-| GET | `/api/leave/all` | Get all leave requests with filtering | Yes | HR | ✅ Implemented |
-| POST | `/api/leave/:id/approve` | Approve a pending leave request | Yes | HR | ✅ Implemented |
-| POST | `/api/leave/:id/reject` | Reject a pending leave request | Yes | HR | ✅ Implemented |
-| POST | `/api/leave/:id/return` | Mark employee as returned from leave | Yes | HR | ✅ Implemented |
+```
+GET /employee-status/:id/history
+```
 
-### Apply for Leave
-
-```http
-POST /api/leave/apply
-Content-Type: application/json
-Authorization: Bearer <employee_token>
-
+Response:
+```json
 {
-  "reason": "Family vacation",
-  "days": 5,
-  "startDate": "2023-06-15"
+  "success": true,
+  "data": [
+    {
+      "status": "ACTIVE",
+      "reason": "Initial onboarding",
+      "timestamp": "2023-01-15T09:00:00Z"
+    },
+    {
+      "status": "ON_LEAVE",
+      "reason": "Family vacation",
+      "timestamp": "2023-08-15T09:00:00Z"
+    },
+    {
+      "status": "ACTIVE",
+      "reason": "Return from leave",
+      "timestamp": "2023-08-20T09:00:00Z"
+    }
+  ]
 }
 ```
 
-**Success Response (201 Created):**
+#### Update Employee Status
+
+```
+POST /employee-status/:id/update
+```
+
+Request:
 ```json
 {
-  "message": "Leave application submitted successfully",
-  "leave": {
-    "id": "uuid-value",
-    "emp_id": "employee-uuid",
-    "reason": "Family vacation",
-    "days": 5,
-    "start_date": "2023-06-15",
-    "status": "PENDING",
-    "submitted_at": "2023-06-01T12:00:00Z"
-  }
+  "status": "PROBATION",
+  "reason": "Performance concerns"
 }
 ```
 
-### Approve Leave (HR Only)
-
-```http
-POST /api/leave/:id/approve
-Authorization: Bearer <hr_token>
-```
-
-**Success Response (200 OK):**
+Response:
 ```json
 {
-  "message": "Leave request approved successfully and recorded on blockchain",
-  "leave": {
-    "id": "uuid-value",
-    "emp_id": "employee-uuid",
-    "reason": "Family vacation",
-    "days": 5,
-    "start_date": "2023-06-15",
-    "status": "APPROVED",
-    "approved_by": "hr-uuid",
-    "approved_at": "2023-06-02T10:30:00Z",
+  "success": true,
+  "message": "Employee status updated successfully",
+  "data": {
+    "employee_id": "123e4567-e89b-12d3-a456-426614174001",
+    "status": "PROBATION",
+    "reason": "Performance concerns",
+    "timestamp": "2023-07-20T14:30:00Z",
     "blockchain_tx": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
-  },
-  "blockchain_tx": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
-  "status_update": {
-    "success": true,
-    "error": null,
-    "transaction": "0x2345678901abcdef2345678901abcdef2345678901abcdef2345678901abcdef"
   }
 }
 ```
 
-### Return From Leave (HR Only)
+### Payroll Management
 
-```http
-POST /api/leave/:id/return
-Content-Type: application/json
-Authorization: Bearer <hr_token>
+#### Send Payroll (HR)
 
+```
+POST /payroll/send
+```
+
+Request:
+```json
 {
-  "comments": "Employee returned as scheduled"
+  "employee_id": "123e4567-e89b-12d3-a456-426614174001",
+  "amount": 5000.00
 }
 ```
 
-**Success Response (200 OK):**
+Response:
 ```json
 {
-  "message": "Employee marked as returned from leave successfully",
-  "leave": {
-    "id": "uuid-value",
-    "emp_id": "employee-uuid",
-    "reason": "Family vacation",
-    "days": 5,
-    "start_date": "2023-06-15",
-    "status": "COMPLETED",
-    "return_date": "2023-07-20T09:00:00Z",
-    "return_comments": "Employee returned as scheduled"
-  },
-  "status_update": {
-    "success": true,
-    "error": null,
-    "transaction": "0x3456789012abcdef3456789012abcdef3456789012abcdef3456789012abcdef"
+  "success": true,
+  "message": "Payroll transaction recorded successfully",
+  "data": {
+    "employee_id": "123e4567-e89b-12d3-a456-426614174001",
+    "amount": 5000.00,
+    "transaction_hash": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+    "timestamp": "2023-07-31T12:00:00Z"
+  }
+}
+```
+
+#### Get Employee Payroll History (HR)
+
+```
+GET /payroll/employee/:id
+```
+
+Response:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "123e4567-e89b-12d3-a456-426614174007",
+      "emp_id": "123e4567-e89b-12d3-a456-426614174001",
+      "amount": 5000.00,
+      "tx_hash": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+      "timestamp": "2023-07-31T12:00:00Z"
+    },
+    {
+      "id": "123e4567-e89b-12d3-a456-426614174008",
+      "emp_id": "123e4567-e89b-12d3-a456-426614174001",
+      "amount": 5000.00,
+      "tx_hash": "0x9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba",
+      "timestamp": "2023-06-30T12:00:00Z"
+    }
+  ],
+  "employee": {
+    "id": "123e4567-e89b-12d3-a456-426614174001",
+    "name": "Jane Smith",
+    "email": "jane@example.com"
+  }
+}
+```
+
+#### Get My Payroll History (Employee)
+
+```
+GET /payroll/my-payments
+```
+
+Response:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "123e4567-e89b-12d3-a456-426614174007",
+      "amount": 5000.00,
+      "tx_hash": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+      "timestamp": "2023-07-31T12:00:00Z"
+    },
+    {
+      "id": "123e4567-e89b-12d3-a456-426614174008",
+      "amount": 5000.00,
+      "tx_hash": "0x9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba",
+      "timestamp": "2023-06-30T12:00:00Z"
+    }
+  ]
+}
+```
+
+#### Get All Payroll Records (HR)
+
+```
+GET /payroll/all
+```
+
+Query Parameters:
+- page (optional): Page number for pagination
+- limit (optional): Results per page
+
+Response:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "123e4567-e89b-12d3-a456-426614174007",
+      "emp_id": "123e4567-e89b-12d3-a456-426614174001",
+      "employees": {
+        "name": "Jane Smith",
+        "email": "jane@example.com"
+      },
+      "amount": 5000.00,
+      "tx_hash": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+      "timestamp": "2023-07-31T12:00:00Z"
+    },
+    ...
+  ],
+  "pagination": {
+    "total": 120,
+    "page": 1,
+    "limit": 10,
+    "pages": 12
   }
 }
 ```
@@ -335,18 +416,6 @@ GET /api/admin/departments
   ]
 }
 ```
-
-## 💸 Payroll Management (Planned)
-
-### Future Endpoints
-
-| Method | Endpoint | Description | Auth Required | Role | Status |
-|--------|----------|-------------|--------------|------|--------|
-| POST | `/api/payroll/send` | Record salary payment | Yes | HR | 🚧 Planned |
-| GET | `/api/payroll/employee/:id` | Get employee payment history | Yes | HR | 🚧 Planned |
-| GET | `/api/payroll/my-payments` | Get my payment history | Yes | Employee | 🚧 Planned |
-
-**Implementation Status**: The Payroll Management module is currently planned but not yet implemented. See the [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) document for the timeline and development roadmap.
 
 ## 🏅 Certificate Management (Planned)
 
